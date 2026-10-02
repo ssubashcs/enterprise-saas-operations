@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="EnterpriseSaaSOperations.Api/EnterpriseSaaSOperations.Api.csproj" />
+  <Project Path="EnterpriseSaaSOperations.Application/EnterpriseSaaSOperations.Application.csproj" />
+  <Project Path="EnterpriseSaaSOperations.Domain/EnterpriseSaaSOperations.Domain.csproj" />
+  <Project Path="EnterpriseSaaSOperations.Infrastructure/EnterpriseSaaSOperations.Infrastructure.csproj" />
+  <Project Path="EnterpriseSaaSOperations.IntegrationTests/EnterpriseSaaSOperations.IntegrationTests.csproj" />
+  <Project Path="EnterpriseSaaSOperations.UnitTests/EnterpriseSaaSOperations.UnitTests.csproj" />
+</Solution>
