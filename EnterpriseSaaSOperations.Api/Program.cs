@@ -1,4 +1,6 @@
 
+using EnterpriseSaaSOperations.Infrastructure.Persistence;
+
 namespace EnterpriseSaaSOperations.Api
 {
     public class Program
@@ -8,6 +10,7 @@ namespace EnterpriseSaaSOperations.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddPersistence(builder.Configuration);
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
