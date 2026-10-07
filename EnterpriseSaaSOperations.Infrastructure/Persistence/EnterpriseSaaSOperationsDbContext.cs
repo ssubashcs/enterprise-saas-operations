@@ -84,6 +84,13 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 
                 entity.HasOne<User>().WithMany().HasForeignKey(request => request.AssigneeUserId)
                                                 .OnDelete(DeleteBehavior.Restrict);
+
+                // Configure indexes.
+                entity.HasIndex(request => new { request.OrganizationId, request.Status });
+
+                entity.HasIndex(request => new { request.OrganizationId, request.AssigneeUserId });
+
+                entity.HasIndex(request => new { request.OrganizationId, request.TeamId });
             });
         }
     }

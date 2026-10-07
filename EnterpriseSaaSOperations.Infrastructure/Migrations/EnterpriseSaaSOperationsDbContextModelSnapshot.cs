@@ -68,11 +68,15 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
                     b.HasIndex("AssigneeUserId");
 
-                    b.HasIndex("OrganizationId");
-
                     b.HasIndex("RequesterUserId");
 
                     b.HasIndex("TeamId");
+
+                    b.HasIndex("OrganizationId", "AssigneeUserId");
+
+                    b.HasIndex("OrganizationId", "Status");
+
+                    b.HasIndex("OrganizationId", "TeamId");
 
                     b.ToTable("OperationalRequests");
                 });
