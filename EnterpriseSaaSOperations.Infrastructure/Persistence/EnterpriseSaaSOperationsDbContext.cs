@@ -1,13 +1,20 @@
 ﻿using EnterpriseSaaSOperations.Domain.Entities;
+using EnterpriseSaaSOperations.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 {
-    public sealed class EnterpriseSaaSOperationsDbContext(DbContextOptions<EnterpriseSaaSOperationsDbContext> options) : DbContext(options)
+    public sealed class EnterpriseSaaSOperationsDbContext : IdentityUserContext<ApplicationIdentityUser>
     {
+        public EnterpriseSaaSOperationsDbContext(DbContextOptions<EnterpriseSaaSOperationsDbContext> options) : base(options)
+        {
+
+        }
+
         public DbSet<Organization> Organizations => Set<Organization>();
 
-        public DbSet<User> Users => Set<User>();
+        public DbSet<User> DomainUsers => Set<User>();
 
         public DbSet<Team> Teams => Set<Team>();
 
@@ -17,6 +24,15 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<ApplicationIdentityUser>(entity =>
+            {
+                entity.Property(user => user.DomainUserId).IsRequired();
+
+                // one-to-one relationship
+                entity.HasOne<User>().WithOne().HasForeignKey<ApplicationIdentityUser>(user => user.DomainUserId)
+                                               .OnDelete(DeleteBehavior.Restrict);
+            });
+
             modelBuilder.Entity<Organization>(entity =>
             {
                 entity.HasKey(organization => organization.Id);
@@ -24,12 +40,12 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                 entity.Property(organization => organization.Name).IsRequired().HasMaxLength(200);
 
                 entity.Property(organization => organization.CreatedAt).IsRequired();
-
-                // entity.HasMany<User>().WithOne().HasForeignKey(user => user.OrganizationId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<User>(entity =>
             {
+                entity.ToTable("Users");
+
                 entity.HasKey(user => user.Id);
 
                 entity.Property(user => user.Name).IsRequired().HasMaxLength(100);
@@ -85,7 +101,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                 entity.HasOne<User>().WithMany().HasForeignKey(request => request.AssigneeUserId)
                                                 .OnDelete(DeleteBehavior.Restrict);
 
-                // Configure indexes.
+                // Configure indexes
                 entity.HasIndex(request => new { request.OrganizationId, request.Status });
 
                 entity.HasIndex(request => new { request.OrganizationId, request.AssigneeUserId });
