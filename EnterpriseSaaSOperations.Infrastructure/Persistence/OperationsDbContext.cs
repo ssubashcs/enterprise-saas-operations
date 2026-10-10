@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 {
-    public sealed class EnterpriseSaaSOperationsDbContext : IdentityUserContext<ApplicationIdentityUser>
+    public sealed class OperationsDbContext : IdentityUserContext<ApplicationIdentityUser>
     {
-        public EnterpriseSaaSOperationsDbContext(DbContextOptions<EnterpriseSaaSOperationsDbContext> options) : base(options)
+        public OperationsDbContext(DbContextOptions<OperationsDbContext> options) : base(options)
         {
 
         }

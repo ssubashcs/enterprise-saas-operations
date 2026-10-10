@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 {
-    [DbContext(typeof(EnterpriseSaaSOperationsDbContext))]
+    [DbContext(typeof(OperationsDbContext))]
     [Migration("20261006143736_AddOperationalRequests")]
     partial class AddOperationalRequests
     {

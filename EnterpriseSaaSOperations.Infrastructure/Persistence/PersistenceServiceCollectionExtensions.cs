@@ -11,7 +11,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                                                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
-            services.AddDbContext<EnterpriseSaaSOperationsDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<OperationsDbContext>(options => options.UseSqlServer(connectionString));
 
             return services;
         }
