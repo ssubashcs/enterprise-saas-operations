@@ -4,7 +4,7 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 {
     public sealed class User
     {
-        public User(int organizationId, string name, string email)
+        public User(int organizationId, string name, string email, UserRole role = UserRole.Member)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
             ArgumentException.ThrowIfNullOrWhiteSpace(email);
@@ -12,7 +12,7 @@ namespace EnterpriseSaaSOperations.Domain.Entities
             OrganizationId = organizationId;
             Name = name.Trim();
             Email = email.Trim();
-            Role = UserRole.Member;
+            Role = role;
             CreatedAt = DateTimeOffset.UtcNow;
         }
 

@@ -1,4 +1,5 @@
 
+using EnterpriseSaaSOperations.Infrastructure.Identity;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
 
 namespace EnterpriseSaaSOperations.Api
@@ -11,6 +12,8 @@ namespace EnterpriseSaaSOperations.Api
 
             // Add services to the container.
             builder.Services.AddPersistence(builder.Configuration);
+            // Identity registration - configures account-management services and connects them to the db context.
+            builder.Services.AddIdentityServices();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -27,7 +30,6 @@ namespace EnterpriseSaaSOperations.Api
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
