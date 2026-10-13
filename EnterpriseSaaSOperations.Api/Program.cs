@@ -1,6 +1,9 @@
 
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EnterpriseSaaSOperations.Api
 {
@@ -13,7 +16,40 @@ namespace EnterpriseSaaSOperations.Api
             // Add services to the container.
             builder.Services.AddPersistence(builder.Configuration);
             // Identity registration - configures account-management services and connects them to the db context.
-            builder.Services.AddIdentityServices();
+            builder.Services.AddIdentityServices(builder.Configuration);
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer();
+
+            builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                            .Configure<IOptions<JwtOptions>>((options, jwtOptionsAccessor) =>
+                            {
+                                var jwtOptions = jwtOptionsAccessor.Value;
+                                var signingKeyBytes = Convert.FromBase64String(jwtOptions.SigningKey);
+
+                                // Keep JWT claim names such as "sub" unchanged.
+                                options.MapInboundClaims = false;
+
+                                options.TokenValidationParameters = new()
+                                {
+                                    ValidateIssuer = true,
+                                    ValidIssuer = jwtOptions.Issuer,
+
+                                    ValidateAudience = true,
+                                    ValidAudience = jwtOptions.Audience,
+
+                                    ValidateIssuerSigningKey = true,
+                                    IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes),
+
+                                    ValidateLifetime = true,
+                                    RequireExpirationTime = true,
+                                    ClockSkew = TimeSpan.FromSeconds(30),
+
+                                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256]
+                                };
+                            });
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -29,6 +65,7 @@ namespace EnterpriseSaaSOperations.Api
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

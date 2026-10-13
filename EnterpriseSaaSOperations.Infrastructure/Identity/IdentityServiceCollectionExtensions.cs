@@ -1,4 +1,6 @@
 ﻿using EnterpriseSaaSOperations.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
@@ -8,14 +10,41 @@ namespace EnterpriseSaaSOperations.Infrastructure.Identity
     /// </summary>
     public static class IdentityServiceCollectionExtensions
     {
-        public static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentityCore<ApplicationIdentityUser>(options => options.User.RequireUniqueEmail = true)
-                    .AddEntityFrameworkStores<OperationsDbContext>();
+                    .AddEntityFrameworkStores<OperationsDbContext>()
+                    .AddSignInManager();
 
-            services.AddScoped<OrganizationOnboardingService>();
+            // Binds configuration values to JwtOptions properties
+            services.AddOptions<JwtOptions>().Bind(configuration.GetRequiredSection(JwtOptions.SectionName))
+                                             .Validate(options => !string.IsNullOrWhiteSpace(options.Issuer), "Jwt:Issuer is required")
+                                             .Validate(options => !string.IsNullOrWhiteSpace(options.Audience), "Jwt:Audience is required")
+                                             .Validate(options => IsValidSigningKey(options.SigningKey), "Jwt:SigningKey must be Base64-encoded and contain at least 32 bytes.")
+                                             .Validate(options => options.AccessTokenLifetimeMinutes is >= 1 and <= 60, "The access-token lifetime must be between 1 and 60 minutes.")
+                                             .ValidateOnStart();
+
+            services.AddScoped<OrganizationOnboardingService>()
+                    .AddScoped<AuthenticationService>()
+                    .AddScoped<JwtTokenService>()
+                    .AddScoped<CurrentUserContextService>();
 
             return services;
         }
+
+        private static bool IsValidSigningKey(string signingKey)
+        {
+            if (string.IsNullOrWhiteSpace(signingKey)) return false;
+
+            try
+            {
+                return Convert.FromBase64String(signingKey).Length >= 32;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
     }
 }

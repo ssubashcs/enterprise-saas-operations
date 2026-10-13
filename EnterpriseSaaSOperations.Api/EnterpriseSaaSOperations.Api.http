@@ -10,3 +10,17 @@ Content-Type: application/json
   "email": "owner.onboarding.test@example.com",
   "password": "Nexora-Onboard#2026"
 }
+
+###
+# @name login
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner.onboarding.test@example.com",
+  "password": "Nexora-Onboard#2026"
+}
+
+###
+GET {{HostAddress}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
