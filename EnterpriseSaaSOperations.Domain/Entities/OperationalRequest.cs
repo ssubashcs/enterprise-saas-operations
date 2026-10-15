@@ -5,10 +5,12 @@ namespace EnterpriseSaaSOperations.Domain.Entities
     public sealed class OperationalRequest
     {
         public OperationalRequest(int organizationId, int requesterUserId, string title, 
-                                                                string description, RequestPriority priority)
+                                  string description, RequestPriority priority)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(title);
             ArgumentException.ThrowIfNullOrWhiteSpace(description);
+
+            if (!Enum.IsDefined(priority)) throw new ArgumentOutOfRangeException(nameof(priority));
 
             OrganizationId = organizationId;
             RequesterUserId = requesterUserId;
@@ -44,19 +46,27 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 
         public void Assign(int teamId, int assigneeUserId)
         {
-            TeamId = teamId;
-            AssigneeUserId = assigneeUserId;
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(teamId);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(assigneeUserId);
 
-            if (Status == RequestStatus.Created)
+            if (Status is not (RequestStatus.Created or RequestStatus.Assigned))
             {
-                Status = RequestStatus.Assigned;
+                throw new InvalidOperationException($"Cannot assign a request while its status is {Status}.");
             }
 
+            TeamId = teamId;
+            AssigneeUserId = assigneeUserId;
+            Status = RequestStatus.Assigned; 
             UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void ChangeStatus(RequestStatus newStatus)
         {
+            if (!Enum.IsDefined(newStatus))
+            {
+                throw new ArgumentOutOfRangeException(nameof(newStatus));
+            }
+
             if (!IsValidTransition(Status, newStatus))
             {
                 throw new InvalidOperationException(

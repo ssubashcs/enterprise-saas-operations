@@ -24,3 +24,18 @@ Content-Type: application/json
 ###
 GET {{HostAddress}}/api/auth/me
 Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+POST {{HostAddress}}/api/requests
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Request sample",
+  "description": "Unable to connect to the test.",
+  "priority": "High"
+}
+
+###
+GET {{HostAddress}}/api/requests/3
+Authorization: Bearer {{login.response.body.$.accessToken}}
