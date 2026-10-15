@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EnterpriseSaaSOperations.Api.Contracts.Auth
+namespace EnterpriseSaaSOperations.Api.Contracts.Authentication
 {
     public sealed class LoginRequest
     {

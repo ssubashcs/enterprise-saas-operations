@@ -57,8 +57,10 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                 entity.HasOne<Organization>().WithMany().HasForeignKey(user => user.OrganizationId)
                                                         .OnDelete(DeleteBehavior.Restrict);
 
-                // one - to - many relationship with an optional foreign key
-                entity.HasOne<Team>().WithMany().HasForeignKey(user => user.TeamId).OnDelete(DeleteBehavior.Restrict);
+                // one - to - many relationship
+                entity.HasOne<Team>().WithMany().HasForeignKey(user => new { user.OrganizationId,  user.TeamId })
+                                                .HasPrincipalKey(team => new { team.OrganizationId, team.Id })
+                                                .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Team>(entity =>
@@ -92,13 +94,16 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                 entity.HasOne<Organization>().WithMany().HasForeignKey(operation => operation.OrganizationId)
                                                         .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<User>().WithMany().HasForeignKey(request => request.RequesterUserId)
+                entity.HasOne<User>().WithMany().HasForeignKey(request => new { request.OrganizationId, request.RequesterUserId })
+                                                .HasPrincipalKey(user => new {user.OrganizationId, user.Id })
                                                 .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<Team>().WithMany().HasForeignKey(request => request.TeamId)
+                entity.HasOne<Team>().WithMany().HasForeignKey(request => new { request.OrganizationId, request.TeamId })
+                                                .HasPrincipalKey(team => new { team.OrganizationId, team.Id })
                                                 .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<User>().WithMany().HasForeignKey(request => request.AssigneeUserId)
+                entity.HasOne<User>().WithMany().HasForeignKey(request => new { request.OrganizationId, request.AssigneeUserId })
+                                                .HasPrincipalKey(user => new { user.OrganizationId, user.Id })
                                                 .OnDelete(DeleteBehavior.Restrict);
 
                 // Configure indexes

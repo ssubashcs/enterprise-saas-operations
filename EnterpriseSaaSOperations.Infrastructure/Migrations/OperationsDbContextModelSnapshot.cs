@@ -66,13 +66,9 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssigneeUserId");
-
-                    b.HasIndex("RequesterUserId");
-
-                    b.HasIndex("TeamId");
-
                     b.HasIndex("OrganizationId", "AssigneeUserId");
+
+                    b.HasIndex("OrganizationId", "RequesterUserId");
 
                     b.HasIndex("OrganizationId", "Status");
 
@@ -123,8 +119,6 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrganizationId");
-
                     b.ToTable("Teams");
                 });
 
@@ -160,9 +154,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("TeamId");
+                    b.HasIndex("OrganizationId", "TeamId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -306,11 +298,6 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
             modelBuilder.Entity("EnterpriseSaaSOperations.Domain.Entities.OperationalRequest", b =>
                 {
-                    b.HasOne("EnterpriseSaaSOperations.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("AssigneeUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("EnterpriseSaaSOperations.Domain.Entities.Organization", null)
                         .WithMany()
                         .HasForeignKey("OrganizationId")
@@ -319,13 +306,21 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
                     b.HasOne("EnterpriseSaaSOperations.Domain.Entities.User", null)
                         .WithMany()
-                        .HasForeignKey("RequesterUserId")
+                        .HasForeignKey("OrganizationId", "AssigneeUserId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("EnterpriseSaaSOperations.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "RequesterUserId")
+                        .HasPrincipalKey("OrganizationId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EnterpriseSaaSOperations.Domain.Entities.Team", null)
                         .WithMany()
-                        .HasForeignKey("TeamId")
+                        .HasForeignKey("OrganizationId", "TeamId")
+                        .HasPrincipalKey("OrganizationId", "Id")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
@@ -348,7 +343,8 @@ namespace EnterpriseSaaSOperations.Infrastructure.Migrations
 
                     b.HasOne("EnterpriseSaaSOperations.Domain.Entities.Team", null)
                         .WithMany()
-                        .HasForeignKey("TeamId")
+                        .HasForeignKey("OrganizationId", "TeamId")
+                        .HasPrincipalKey("OrganizationId", "Id")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

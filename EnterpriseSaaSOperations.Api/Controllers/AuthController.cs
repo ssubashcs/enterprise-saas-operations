@@ -1,4 +1,4 @@
-﻿using EnterpriseSaaSOperations.Api.Contracts.Auth;
+﻿using EnterpriseSaaSOperations.Api.Contracts.Authentication;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

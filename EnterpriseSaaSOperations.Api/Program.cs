@@ -1,7 +1,10 @@
 
+using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
+using EnterpriseSaaSOperations.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -49,7 +52,24 @@ namespace EnterpriseSaaSOperations.Api
                                 };
                             });
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddScoped<IAuthorizationHandler, DomainRoleAuthorizationHandler>();
+
+            builder.Services.AddAuthorizationBuilder()
+                            .AddPolicy(AuthorizationPolicies.AdministratorOrOwner, 
+                                       policy =>
+                                       {
+                                           policy.RequireAuthenticatedUser();
+
+                                           policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner,
+                                                                                           UserRole.Administrator));
+                                       })
+                            .AddPolicy(AuthorizationPolicies.OwnerOnly, 
+                                       policy =>
+                                       {
+                                           policy.RequireAuthenticatedUser();
+                                       
+                                           policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner));
+                                       });
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
