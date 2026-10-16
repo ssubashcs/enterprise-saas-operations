@@ -39,3 +39,44 @@ Content-Type: application/json
 ###
 GET {{HostAddress}}/api/requests/3
 Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+POST {{HostAddress}}/api/organizations
+Content-Type: application/json
+
+{
+  "organizationName": "Architecture Verification Org",
+  "ownerName": "Architecture Test Owner",
+  "email": "architecture-owner-20261016@example.com",
+  "password": "Smoke-Test#2026"
+}
+
+### Login
+# @name architectureLogin
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "architecture-owner-20261016@example.com",
+  "password": "Smoke-Test#2026"
+}
+
+### Get authenticated user context
+GET {{HostAddress}}/api/auth/me
+Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}
+
+### Create operational request
+# @name architectureRequest
+POST {{HostAddress}}/api/requests
+Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Architecture Verification Request",
+  "description": "Verify the refactored request workflow.",
+  "priority": "Medium"
+}
+
+### Retrieve operational request
+GET {{HostAddress}}/api/requests/{{architectureRequest.response.body.$.id}}
+Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}

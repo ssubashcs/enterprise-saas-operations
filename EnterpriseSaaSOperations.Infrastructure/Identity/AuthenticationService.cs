@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Authentication;
+using Microsoft.AspNetCore.Identity;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class AuthenticationService
+    public sealed class AuthenticationService : ICredentialVerifier
     {
         private readonly UserManager<ApplicationIdentityUser> _userManager;
         private readonly SignInManager<ApplicationIdentityUser> _signInManager;

@@ -1,4 +1,4 @@
-﻿using EnterpriseSaaSOperations.Infrastructure.Identity;
+﻿using EnterpriseSaaSOperations.Application.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 
 namespace EnterpriseSaaSOperations.Api.Authorization
@@ -8,9 +8,9 @@ namespace EnterpriseSaaSOperations.Api.Authorization
     /// </summary>
     internal class DomainRoleAuthorizationHandler : AuthorizationHandler<DomainRoleRequirement>
     {
-        private readonly CurrentUserContextService _currentUserContextService;
+        private readonly ICurrentUserContextService _currentUserContextService;
 
-        public DomainRoleAuthorizationHandler(CurrentUserContextService currentUserContextService)
+        public DomainRoleAuthorizationHandler(ICurrentUserContextService currentUserContextService)
         {
             _currentUserContextService = currentUserContextService;
         }

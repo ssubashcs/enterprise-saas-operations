@@ -1,5 +1,5 @@
 ﻿using EnterpriseSaaSOperations.Api.Contracts.Organizations;
-using EnterpriseSaaSOperations.Infrastructure.Identity;
+using EnterpriseSaaSOperations.Application.Organizations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

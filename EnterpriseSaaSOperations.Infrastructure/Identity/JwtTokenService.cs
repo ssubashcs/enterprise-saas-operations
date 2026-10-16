@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Authentication;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
@@ -6,7 +8,7 @@ using System.Security.Claims;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class JwtTokenService
+    public sealed class JwtTokenService : IAccessTokenIssuer
     {
         private readonly JwtOptions _options;
         private readonly SymmetricSecurityKey _signingKey;

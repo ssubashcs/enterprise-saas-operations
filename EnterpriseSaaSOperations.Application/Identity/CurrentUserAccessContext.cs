@@ -1,6 +1,6 @@
 ﻿using EnterpriseSaaSOperations.Domain.Enums;
 
-namespace EnterpriseSaaSOperations.Infrastructure.Identity
+namespace EnterpriseSaaSOperations.Application.Identity
 {
     public sealed record CurrentUserAccessContext(int UserId,
                                                   int OrganizationId,

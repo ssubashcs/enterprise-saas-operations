@@ -1,7 +1,8 @@
 ﻿using EnterpriseSaaSOperations.Api.Contracts.OperationalRequests;
+using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Identity;
+using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Domain.Entities;
-using EnterpriseSaaSOperations.Infrastructure.Identity;
-using EnterpriseSaaSOperations.Infrastructure.OperationalRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +13,10 @@ namespace EnterpriseSaaSOperations.Api.Controllers
     [Authorize]
     public sealed class OperationalRequestsController : ControllerBase
     {
-        private readonly CurrentUserContextService _currentUserContextService;
+        private readonly ICurrentUserContextService _currentUserContextService;
         private readonly OperationalRequestService _requestService;
 
-        public OperationalRequestsController(CurrentUserContextService currentUserContextService, OperationalRequestService requestService)
+        public OperationalRequestsController(ICurrentUserContextService currentUserContextService, OperationalRequestService requestService)
         {
             _currentUserContextService = currentUserContextService;
             _requestService = requestService;

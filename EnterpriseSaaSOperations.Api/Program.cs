@@ -1,8 +1,10 @@
 
 using EnterpriseSaaSOperations.Api.Authorization;
+using EnterpriseSaaSOperations.Application.Authentication;
+using EnterpriseSaaSOperations.Application.OperationalRequests;
+using EnterpriseSaaSOperations.Application.Organizations;
 using EnterpriseSaaSOperations.Domain.Enums;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
-using EnterpriseSaaSOperations.Infrastructure.OperationalRequests;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -61,15 +63,13 @@ namespace EnterpriseSaaSOperations.Api
                                        policy =>
                                        {
                                            policy.RequireAuthenticatedUser();
-
                                            policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner,
-                                                                                           UserRole.Administrator));
+                                                                                            UserRole.Administrator));
                                        })
                             .AddPolicy(AuthorizationPolicies.OwnerOnly, 
                                        policy =>
                                        {
                                            policy.RequireAuthenticatedUser();
-                                       
                                            policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner));
                                        });
 
@@ -79,7 +79,10 @@ namespace EnterpriseSaaSOperations.Api
                                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(null, false));
                             });
 
-            builder.Services.AddScoped<OperationalRequestService>();
+            // Register the Application use cases.
+            builder.Services.AddScoped<LoginService>()
+                            .AddScoped<OrganizationOnboardingService>()
+                            .AddScoped<OperationalRequestService>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();

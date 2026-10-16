@@ -1,4 +1,5 @@
-﻿using EnterpriseSaaSOperations.Infrastructure.Persistence;
+﻿using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +25,11 @@ namespace EnterpriseSaaSOperations.Infrastructure.Identity
                                              .Validate(options => options.AccessTokenLifetimeMinutes is >= 1 and <= 60, "The access-token lifetime must be between 1 and 60 minutes.")
                                              .ValidateOnStart();
 
-            services.AddScoped<OrganizationOnboardingService>()
-                    .AddScoped<AuthenticationService>()
-                    .AddScoped<JwtTokenService>()
-                    .AddScoped<CurrentUserContextService>();
+            // API and authorization handler depend on the Application contract. Infrastructure supplies its implementation.
+            services.AddScoped<ICredentialVerifier, AuthenticationService>()
+                    .AddScoped<IAccessTokenIssuer, JwtTokenService>()
+                    .AddScoped<IIdentityAccountManager, IdentityAccountManager>()
+                    .AddScoped<ICurrentUserContextService, CurrentUserContextService>();
 
             return services;
         }

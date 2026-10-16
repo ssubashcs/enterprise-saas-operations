@@ -1,4 +1,4 @@
-﻿namespace EnterpriseSaaSOperations.Infrastructure.Identity
+﻿namespace EnterpriseSaaSOperations.Application.Authentication
 {
     /// <summary>
     /// Identifies an Identity account after successful credential verification.

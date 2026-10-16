@@ -1,4 +1,4 @@
-﻿namespace EnterpriseSaaSOperations.Infrastructure.Identity
+﻿namespace EnterpriseSaaSOperations.Application.Organizations
 {
     public sealed record OrganizationOnboardingResult(bool Succeeded,
                                                       int? OrganizationId,

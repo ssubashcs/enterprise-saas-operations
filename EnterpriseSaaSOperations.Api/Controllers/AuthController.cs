@@ -1,5 +1,6 @@
 ﻿using EnterpriseSaaSOperations.Api.Contracts.Authentication;
-using EnterpriseSaaSOperations.Infrastructure.Identity;
+using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,14 +10,12 @@ namespace EnterpriseSaaSOperations.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AuthenticationService _authenticationService;
-        private readonly JwtTokenService _jwtTokenService;
-        private readonly CurrentUserContextService _currentUserContextService;
+        private readonly LoginService _loginService;
+        private readonly ICurrentUserContextService _currentUserContextService;
 
-        public AuthController(AuthenticationService authenticationService, JwtTokenService jwtTokenService, CurrentUserContextService currentUserContextService)
+        public AuthController(LoginService loginService, ICurrentUserContextService currentUserContextService)
         {
-            _authenticationService = authenticationService;
-            _jwtTokenService = jwtTokenService;
+            _loginService = loginService;
             _currentUserContextService = currentUserContextService;
         }
 
@@ -26,9 +25,9 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
-            var credentials = await _authenticationService.VerifyCredentialsAsync(request.Email, request.Password);
+            var issuedToken = await _loginService.LoginAsync(request.Email, request.Password);
 
-            if (credentials is null)
+            if (issuedToken is null)
             {
                 return Unauthorized(new ProblemDetails
                 {
@@ -37,8 +36,6 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                     Detail = "The email or password is incorrect."
                 });
             }
-
-            IssuedAccessToken issuedToken = _jwtTokenService.CreateAccessToken(credentials);
 
             LoginResponse response = new(issuedToken.Value, "Bearer", issuedToken.ExpiresAtUtc);
 

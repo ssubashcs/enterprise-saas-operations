@@ -1,12 +1,15 @@
-﻿using EnterpriseSaaSOperations.Infrastructure.Persistence;
+﻿using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Identity;
+using EnterpriseSaaSOperations.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class CurrentUserContextService(OperationsDbContext dbContext)
+    public sealed class CurrentUserContextService(OperationsDbContext dbContext) : ICurrentUserContextService
     {
         private readonly OperationsDbContext _dbContext = dbContext; 
 
+        /// <inheritdoc/>
         public async Task<CurrentUserAccessContext?> GetByIdentityUserIdAsync(string identityUserId, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identityUserId);

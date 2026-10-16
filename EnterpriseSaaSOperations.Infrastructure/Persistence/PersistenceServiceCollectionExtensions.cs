@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EnterpriseSaaSOperations.Application;
+using EnterpriseSaaSOperations.Application.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +14,11 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                                                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
             services.AddDbContext<OperationsDbContext>(options => options.UseSqlServer(connectionString));
+
+            services.AddScoped<IOperationalRequestRepository, OperationalRequestRepository>()
+                    .AddScoped<IOrganizationRepository, OrganizationRepository>()
+                    .AddScoped<IDomainUserRepository, DomainUserRepository>()
+                    .AddScoped<IUnitOfWork, EfCoreUnitOfWork>();
 
             return services;
         }

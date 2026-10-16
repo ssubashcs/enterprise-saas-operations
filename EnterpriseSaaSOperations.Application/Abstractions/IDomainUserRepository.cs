@@ -1,0 +1,12 @@
+﻿using EnterpriseSaaSOperations.Domain.Entities;
+
+namespace EnterpriseSaaSOperations.Application.Abstractions
+{
+    public interface IDomainUserRepository
+    {
+        /// <summary>
+        /// Adds a domain user to the current unit of work.
+        /// </summary>
+        void Add(User user);
+    }
+}
