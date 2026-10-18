@@ -18,7 +18,8 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
             services.AddScoped<IOperationalRequestRepository, OperationalRequestRepository>()
                     .AddScoped<IOrganizationRepository, OrganizationRepository>()
                     .AddScoped<IDomainUserRepository, DomainUserRepository>()
-                    .AddScoped<IUnitOfWork, EfCoreUnitOfWork>();
+                    .AddScoped<IUnitOfWork, EfCoreUnitOfWork>()
+                    .AddScoped<ITeamRepository, TeamRepository>();
 
             return services;
         }

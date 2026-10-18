@@ -80,3 +80,30 @@ Content-Type: application/json
 ### Retrieve operational request
 GET {{HostAddress}}/api/requests/{{architectureRequest.response.body.$.id}}
 Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}
+
+###
+# @name createTeam
+POST {{HostAddress}}/api/teams
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "Engineering"
+}
+
+###
+GET {{HostAddress}}/api/teams/1
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+GET {{HostAddress}}/api/teams?page=1&pageSize=20
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### 
+PUT {{HostAddress}}/api/teams/1
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "Platform Engineering"
+}

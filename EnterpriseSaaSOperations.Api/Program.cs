@@ -3,6 +3,7 @@ using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Application.Authentication;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Application.Organizations;
+using EnterpriseSaaSOperations.Application.Teams;
 using EnterpriseSaaSOperations.Domain.Enums;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
@@ -82,7 +83,8 @@ namespace EnterpriseSaaSOperations.Api
             // Register the Application use cases.
             builder.Services.AddScoped<LoginService>()
                             .AddScoped<OrganizationOnboardingService>()
-                            .AddScoped<OperationalRequestService>();
+                            .AddScoped<OperationalRequestService>()
+                            .AddScoped<TeamManagementService>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
