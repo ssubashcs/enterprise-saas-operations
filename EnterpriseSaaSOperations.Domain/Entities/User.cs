@@ -34,5 +34,12 @@ namespace EnterpriseSaaSOperations.Domain.Entities
         {
             Role = role;
         }
+
+        public void AssignToTeam(int teamId)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(teamId);
+
+            TeamId = teamId;
+        }
     }
 }

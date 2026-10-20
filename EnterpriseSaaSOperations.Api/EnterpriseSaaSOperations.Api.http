@@ -12,7 +12,7 @@ Content-Type: application/json
 }
 
 ###
-# @name login
+# @name ownerLogin1
 POST {{HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -23,11 +23,11 @@ Content-Type: application/json
 
 ###
 GET {{HostAddress}}/api/auth/me
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 
 ###
 POST {{HostAddress}}/api/requests
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -38,7 +38,7 @@ Content-Type: application/json
 
 ###
 GET {{HostAddress}}/api/requests/3
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 
 ###
 POST {{HostAddress}}/api/organizations
@@ -52,7 +52,7 @@ Content-Type: application/json
 }
 
 ### Login
-# @name architectureLogin
+# @name ownerLogin2
 POST {{HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -63,12 +63,12 @@ Content-Type: application/json
 
 ### Get authenticated user context
 GET {{HostAddress}}/api/auth/me
-Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
 
 ### Create operational request
 # @name architectureRequest
 POST {{HostAddress}}/api/requests
-Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -79,12 +79,12 @@ Content-Type: application/json
 
 ### Retrieve operational request
 GET {{HostAddress}}/api/requests/{{architectureRequest.response.body.$.id}}
-Authorization: Bearer {{architectureLogin.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
 
 ###
 # @name createTeam
 POST {{HostAddress}}/api/teams
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -93,17 +93,72 @@ Content-Type: application/json
 
 ###
 GET {{HostAddress}}/api/teams/1
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 
 ###
 GET {{HostAddress}}/api/teams?page=1&pageSize=20
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 
 ### 
 PUT {{HostAddress}}/api/teams/1
-Authorization: Bearer {{login.response.body.$.accessToken}}
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
     "name": "Platform Engineering"
+}
+
+###
+# @name memberTestTeam
+POST {{HostAddress}}/api/teams
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "Member Provisioning Test Team"
+}
+
+### createMemberWithoutTeam
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Provisioned Member One",
+  "email": "member-one-20261020@example.com",
+  "password": "Member-Test#1"
+}
+
+###
+# createMemberWithTeam
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Provisioned Member Two",
+  "email": "member-two-20261020@example.com",
+  "password": "Member-Test#2026",
+  "teamId": {{memberTestTeam.response.body.$.id}}
+}
+
+###
+# @name memberLogin1
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "member-one-20261020@example.com",
+  "password": "Member-Test#1"
+}
+
+###
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Member",
+  "email": "unauthorized-member@example.com",
+  "password": "Member-Test#3"
 }

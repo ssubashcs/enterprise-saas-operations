@@ -68,8 +68,8 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(PagedResponse<TeamResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<PagedResponse<TeamResponse>>> GetPage([FromQuery, Range(1, 1_000_000)] int page = 1,
-                                                                            [FromQuery, Range(1, 100)] int pageSize = 20, 
-                                                                            CancellationToken cancellationToken = default)
+                                                                             [FromQuery, Range(1, 100)] int pageSize = 20,
+                                                                             CancellationToken cancellationToken = default)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 

@@ -1,6 +1,7 @@
 
 using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Application.Authentication;
+using EnterpriseSaaSOperations.Application.Members;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Application.Organizations;
 using EnterpriseSaaSOperations.Application.Teams;
@@ -84,7 +85,8 @@ namespace EnterpriseSaaSOperations.Api
             builder.Services.AddScoped<LoginService>()
                             .AddScoped<OrganizationOnboardingService>()
                             .AddScoped<OperationalRequestService>()
-                            .AddScoped<TeamManagementService>();
+                            .AddScoped<TeamManagementService>()
+                            .AddScoped<MemberProvisioningService>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
