@@ -86,7 +86,8 @@ namespace EnterpriseSaaSOperations.Api
                             .AddScoped<OrganizationOnboardingService>()
                             .AddScoped<OperationalRequestService>()
                             .AddScoped<TeamManagementService>()
-                            .AddScoped<MemberProvisioningService>();
+                            .AddScoped<MemberProvisioningService>()
+                            .AddScoped<MemberRoleManagementService>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();

@@ -9,6 +9,11 @@ namespace EnterpriseSaaSOperations.Domain.Entities
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
             ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
+            if (!Enum.IsDefined(role))
+            {
+                throw new ArgumentOutOfRangeException(nameof(role));
+            }
+
             OrganizationId = organizationId;
             Name = name.Trim();
             Email = email.Trim();
@@ -32,6 +37,21 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 
         public void ChangeRole(UserRole role)
         {
+            if (!Enum.IsDefined(role))
+            {
+                throw new ArgumentOutOfRangeException(nameof(role));
+            }
+
+            if (Role == UserRole.Owner)
+            {
+                throw new InvalidOperationException("An Owner's role cannot be changed through regular role management.");
+            }
+
+            if (role == UserRole.Owner)
+            {
+                throw new InvalidOperationException("The Owner role cannot be assigned through regular role management.");
+            }
+
             Role = role;
         }
 

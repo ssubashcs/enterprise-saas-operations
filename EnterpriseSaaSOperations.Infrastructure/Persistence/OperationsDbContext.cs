@@ -7,10 +7,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 {
     public sealed class OperationsDbContext : IdentityUserContext<ApplicationIdentityUser>
     {
-        public OperationsDbContext(DbContextOptions<OperationsDbContext> options) : base(options)
-        {
-
-        }
+        public OperationsDbContext(DbContextOptions<OperationsDbContext> options) : base(options) { }
 
         public DbSet<Organization> Organizations => Set<Organization>();
 
@@ -23,16 +20,16 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+        
             modelBuilder.Entity<ApplicationIdentityUser>(entity =>
             {
                 entity.Property(user => user.DomainUserId).IsRequired();
-
+        
                 // one-to-one relationship
                 entity.HasOne<User>().WithOne().HasForeignKey<ApplicationIdentityUser>(user => user.DomainUserId)
                                                .OnDelete(DeleteBehavior.Restrict);
             });
-
+        
             modelBuilder.Entity<Organization>(entity =>
             {
                 entity.HasKey(organization => organization.Id);
@@ -56,7 +53,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 
                 entity.HasOne<Organization>().WithMany().HasForeignKey(user => user.OrganizationId)
                                                         .OnDelete(DeleteBehavior.Restrict);
-
+                                                                                            
                 // one - to - many relationship
                 entity.HasOne<Team>().WithMany().HasForeignKey(user => new { user.OrganizationId,  user.TeamId })
                                                 .HasPrincipalKey(team => new { team.OrganizationId, team.Id })

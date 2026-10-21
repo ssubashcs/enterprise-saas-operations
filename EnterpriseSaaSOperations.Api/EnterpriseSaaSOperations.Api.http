@@ -162,3 +162,21 @@ Content-Type: application/json
   "email": "unauthorized-member@example.com",
   "password": "Member-Test#3"
 }
+
+### Promote
+PUT {{HostAddress}}/api/members/1004/role
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "role": "Administrator"
+}
+
+### 
+PUT {{HostAddress}}/api/members/1005/role
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "role": "Member"
+}

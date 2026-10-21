@@ -1,7 +1,9 @@
 ﻿using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Api.Contracts.Members;
 using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Contracts.Members;
 using EnterpriseSaaSOperations.Application.Members;
+using EnterpriseSaaSOperations.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +16,14 @@ namespace EnterpriseSaaSOperations.Api.Controllers
     {
         private readonly ICurrentUserContextService _currentUserContextService;
         private readonly MemberProvisioningService _memberProvisioningService;
+        private readonly MemberRoleManagementService _memberRoleManagementService;
 
-        public MembersController(ICurrentUserContextService currentUserContextService, MemberProvisioningService memberProvisioningService)
+        public MembersController(ICurrentUserContextService currentUserContextService, MemberProvisioningService memberProvisioningService,
+                                 MemberRoleManagementService memberRoleManagementService)
         {
             _currentUserContextService = currentUserContextService;
             _memberProvisioningService = memberProvisioningService;
+            _memberRoleManagementService = memberRoleManagementService;
         }
 
         [HttpPost]
@@ -82,6 +87,67 @@ namespace EnterpriseSaaSOperations.Api.Controllers
             // Member retrieval is not exposed by this controller yet,
             // so there is no resource URL to provide in a Location header.
             return StatusCode(StatusCodes.Status201Created, response);
+        }
+
+        [HttpPut("{id:int}/role")]
+        [Authorize(Policy = AuthorizationPolicies.OwnerOnly)]
+        [ProducesResponseType(typeof(MemberRoleChangeResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<MemberRoleChangeResponse>> ChangeRole(int id, ChangeMemberRoleRequest request, CancellationToken cancellationToken)
+        {
+            var identityUserId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
+
+            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+
+            if (currentUser is null) return Unauthorized();
+
+            var result = await _memberRoleManagementService.ChangeRoleAsync(currentUser, id, request.Role!.Value, cancellationToken);
+
+            if (result.Succeeded)
+            {
+                if (result.UserId is not int userId || result.Role is not UserRole role)
+                {
+                    throw new InvalidOperationException("A successful role change must return the user ID and role.");
+                }
+
+                return Ok(new MemberRoleChangeResponse(userId, role.ToString()));
+            }
+
+            return result.Failure switch
+            {
+                MemberRoleChangeFailure.CallerNotOwner => Forbid(),
+
+                MemberRoleChangeFailure.UserNotFound => NotFound(),
+
+                MemberRoleChangeFailure.InvalidRole => BadRequest(new ProblemDetails
+                                                       {
+                                                           Status = StatusCodes.Status400BadRequest,
+                                                           Title = "Invalid role.",
+                                                           Detail = "The requested role is not supported."
+                                                       }),
+
+                MemberRoleChangeFailure.OwnerRoleCannotBeAssigned => BadRequest(new ProblemDetails
+                                                       {
+                                                           Status = StatusCodes.Status400BadRequest,
+                                                           Title = "Invalid role change.",
+                                                           Detail = "The Owner role cannot be assigned through this operation."
+                                                       }),
+
+                MemberRoleChangeFailure.OwnerRoleCannotBeChanged => Conflict(new ProblemDetails
+                                                       {
+                                                           Status = StatusCodes.Status409Conflict,
+                                                           Title = "Role change conflict.",
+                                                           Detail = "An Owner's role cannot be changed through this operation."
+                                                       }),
+
+                _ => throw new InvalidOperationException($"Unexpected role-change failure: {result.Failure}.")
+            };
         }
     }
 }

@@ -8,5 +8,9 @@ namespace EnterpriseSaaSOperations.Application.Abstractions
         /// Adds a domain user to the current unit of work.
         /// </summary>
         void Add(User user);
+
+        Task<User?> GetByIdForUpdateAsync(int userId,
+                                          int organizationId,
+                                          CancellationToken cancellationToken = default);
     }
 }
