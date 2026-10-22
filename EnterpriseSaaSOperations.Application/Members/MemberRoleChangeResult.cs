@@ -1,6 +1,6 @@
 ﻿using EnterpriseSaaSOperations.Domain.Enums;
 
-namespace EnterpriseSaaSOperations.Application.Contracts.Members
+namespace EnterpriseSaaSOperations.Application.Members
 {
     public sealed record MemberRoleChangeResult(bool Succeeded,
                                                 int? UserId,

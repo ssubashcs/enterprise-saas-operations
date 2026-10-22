@@ -1,4 +1,4 @@
-﻿namespace EnterpriseSaaSOperations.Application.Contracts.Members
+﻿namespace EnterpriseSaaSOperations.Application.Members
 {
     public enum MemberRoleChangeFailure
     {

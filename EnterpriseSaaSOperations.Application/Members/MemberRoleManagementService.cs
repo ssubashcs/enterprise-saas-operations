@@ -1,5 +1,4 @@
 ﻿using EnterpriseSaaSOperations.Application.Abstractions;
-using EnterpriseSaaSOperations.Application.Contracts.Members;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Domain.Enums;
 

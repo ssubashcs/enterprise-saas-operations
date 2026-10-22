@@ -61,5 +61,10 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 
             TeamId = teamId;
         }
+
+        public void RemoveFromTeam()
+        {
+            TeamId = null;
+        }
     }
 }

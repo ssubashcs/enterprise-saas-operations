@@ -180,3 +180,26 @@ Content-Type: application/json
 {
     "role": "Member"
 }
+
+###
+# @name memberLogin2
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "member-two-20261020@example.com",
+  "password": "Member-Test#2026"
+}
+
+### Add member to a team
+PUT {{HostAddress}}/api/members/1005/team
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "teamId": 2
+}
+
+### Remove member from a team
+DELETE {{HostAddress}}/api/members/1005/team
+Authorization: Bearer {{memberLogin2.response.body.$.accessToken}}

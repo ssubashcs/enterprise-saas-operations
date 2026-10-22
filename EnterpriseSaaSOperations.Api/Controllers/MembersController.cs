@@ -1,8 +1,8 @@
 ﻿using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Api.Contracts.Members;
 using EnterpriseSaaSOperations.Application.Abstractions;
-using EnterpriseSaaSOperations.Application.Contracts.Members;
 using EnterpriseSaaSOperations.Application.Members;
+using EnterpriseSaaSOperations.Application.Teams;
 using EnterpriseSaaSOperations.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +17,15 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         private readonly ICurrentUserContextService _currentUserContextService;
         private readonly MemberProvisioningService _memberProvisioningService;
         private readonly MemberRoleManagementService _memberRoleManagementService;
+        private readonly TeamMembershipService _teamMembershipService;
 
         public MembersController(ICurrentUserContextService currentUserContextService, MemberProvisioningService memberProvisioningService,
-                                 MemberRoleManagementService memberRoleManagementService)
+                                 MemberRoleManagementService memberRoleManagementService, TeamMembershipService teamMembershipService)
         {
             _currentUserContextService = currentUserContextService;
             _memberProvisioningService = memberProvisioningService;
             _memberRoleManagementService = memberRoleManagementService;
+            _teamMembershipService = teamMembershipService;
         }
 
         [HttpPost]
@@ -126,27 +128,97 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                 MemberRoleChangeFailure.UserNotFound => NotFound(),
 
                 MemberRoleChangeFailure.InvalidRole => BadRequest(new ProblemDetails
-                                                       {
-                                                           Status = StatusCodes.Status400BadRequest,
-                                                           Title = "Invalid role.",
-                                                           Detail = "The requested role is not supported."
-                                                       }),
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Invalid role.",
+                    Detail = "The requested role is not supported."
+                }),
 
                 MemberRoleChangeFailure.OwnerRoleCannotBeAssigned => BadRequest(new ProblemDetails
-                                                       {
-                                                           Status = StatusCodes.Status400BadRequest,
-                                                           Title = "Invalid role change.",
-                                                           Detail = "The Owner role cannot be assigned through this operation."
-                                                       }),
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Invalid role change.",
+                    Detail = "The Owner role cannot be assigned through this operation."
+                }),
 
                 MemberRoleChangeFailure.OwnerRoleCannotBeChanged => Conflict(new ProblemDetails
-                                                       {
-                                                           Status = StatusCodes.Status409Conflict,
-                                                           Title = "Role change conflict.",
-                                                           Detail = "An Owner's role cannot be changed through this operation."
-                                                       }),
+                {
+                    Status = StatusCodes.Status409Conflict,
+                    Title = "Role change conflict.",
+                    Detail = "An Owner's role cannot be changed through this operation."
+                }),
 
                 _ => throw new InvalidOperationException($"Unexpected role-change failure: {result.Failure}.")
+            };
+        }
+
+        [HttpPut("{id:int}/team")]
+        [Authorize(Policy = AuthorizationPolicies.AdministratorOrOwner)]
+        [ProducesResponseType(typeof(TeamMembershipResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TeamMembershipResponse>> AssignToTeam(int id, AssignMemberToTeamRequest request, CancellationToken cancellationToken)
+        {
+            var identityUserId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
+
+            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+
+            if (currentUser is null) return Unauthorized();
+
+            var result = await _teamMembershipService.AssignAsync(currentUser, id, request.TeamId!.Value, cancellationToken);
+
+            if (result.Succeeded)
+            {
+                return Ok(new TeamMembershipResponse(result.UserId!.Value, result.TeamId));
+            }
+
+            return result.Failure switch
+            {
+                TeamMembershipFailure.CallerNotAdministratorOrOwner => Forbid(),
+
+                TeamMembershipFailure.UserNotFound => NotFound(),
+
+                TeamMembershipFailure.TeamNotFound => NotFound(new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Team not found.",
+                    Detail = "The requested team was not found in your organization."
+                }),
+
+                _ => throw new InvalidOperationException($"Unexpected team membership failure: {result.Failure}.")
+            };
+        }
+
+        [HttpDelete("{id:int}/team")]
+        [Authorize(Policy = AuthorizationPolicies.AdministratorOrOwner)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RemoveFromTeam(int id, CancellationToken cancellationToken)
+        {
+            var identityUserId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
+
+            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+
+            if (currentUser is null) return Unauthorized();
+
+            var result = await _teamMembershipService.RemoveAsync(currentUser, id, cancellationToken);
+
+            if (result.Succeeded) return NoContent();
+
+            return result.Failure switch
+            {
+                TeamMembershipFailure.CallerNotAdministratorOrOwner => Forbid(),
+                TeamMembershipFailure.UserNotFound => NotFound(),
+
+                _ => throw new InvalidOperationException($"Unexpected team membership failure: {result.Failure}.")
             };
         }
     }
