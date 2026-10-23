@@ -21,8 +21,17 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
         {
             return _dbContext.OperationalRequests.AsNoTracking()
                                                  .SingleOrDefaultAsync(request =>
-                                                                        request.Id == requestId &&
-                                                                        request.OrganizationId == organizationId,
+                                                                         request.Id == requestId &&
+                                                                         request.OrganizationId == organizationId,
+                                                                       cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<OperationalRequest?> GetByIdForUpdateAsync(int requestId, int organizationId, CancellationToken cancellationToken = default)
+        {
+            return _dbContext.OperationalRequests.SingleOrDefaultAsync(request =>
+                                                                         request.Id == requestId &&
+                                                                         request.OrganizationId == organizationId,
                                                                        cancellationToken);
         }
     }

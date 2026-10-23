@@ -1,4 +1,5 @@
-﻿using EnterpriseSaaSOperations.Api.Contracts.OperationalRequests;
+﻿using EnterpriseSaaSOperations.Api.Authorization;
+using EnterpriseSaaSOperations.Api.Contracts.OperationalRequests;
 using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
@@ -26,7 +27,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(OperationalRequestResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<OperationalRequestResponse>> Create(CreateOperationalRequestRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<OperationalRequestResponse>> Create(OperationalRequestCreationRequest request, CancellationToken cancellationToken)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
@@ -57,6 +58,59 @@ namespace EnterpriseSaaSOperations.Api.Controllers
             return Ok(ToResponse(request));
         }
 
+        [HttpPut("{id:int}/assign")]
+        [Authorize(Policy = AuthorizationPolicies.AdministratorOrOwner)]
+        [ProducesResponseType(typeof(OperationalRequestAssignmentResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Assign(int id, OperationalRequestAssignmentRequest request, CancellationToken cancellationToken)
+        {
+            string? identityUserId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
+
+            CurrentUserAccessContext? currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+
+            if (currentUser is null) return Unauthorized();
+
+            RequestAssignmentResult result = await _requestService.AssignAsync(currentUser, id, request.TeamId, request.AssigneeUserId, cancellationToken);
+
+            if (result.Success)
+            {
+                OperationalRequestAssignmentResponse response = new(result.RequestId!.Value, result.TeamId!.Value, 
+                                                                    result.AssigneeUserId!.Value, result.Status!.Value);
+
+                return Ok(response);
+            }
+
+            return result.Failure switch
+            {
+                RequestAssignmentFailure.CallerNotAuthorized => Forbid(),
+
+                RequestAssignmentFailure.RequestNotFound or
+                RequestAssignmentFailure.TeamNotFound or
+                RequestAssignmentFailure.AssigneeNotFound => NotFound(),
+
+                RequestAssignmentFailure.AssigneeNotInTeam => BadRequest(Problem(title: "Invalid assignment",
+                                                                                 detail: "The selected assignee must belong to the selected team.",
+                                                                                 statusCode: StatusCodes.Status400BadRequest)),
+
+                RequestAssignmentFailure.InvalidAssignment => BadRequest(Problem(title: "Invalid assignment",
+                                                                                 detail: "A valid request, team, and assignee must be specified.",
+                                                                                 statusCode: StatusCodes.Status400BadRequest)),
+
+                RequestAssignmentFailure.InvalidRequestStatus => Conflict(Problem(title: "Request cannot be assigned",
+                                                                                  detail: "The request's current status does not permit assignment.",
+                                                                                  statusCode: StatusCodes.Status409Conflict)),
+
+                _ => Problem(statusCode: StatusCodes.Status500InternalServerError,
+                             title: "An unexpected error occurred")
+            };
+        }
+
         private async Task<CurrentUserAccessContext?> ResolveCurrentUserAsync(CancellationToken cancellationToken)
         {
             var identityUserId = User.FindFirst("sub")?.Value;
@@ -73,6 +127,8 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                                                   request.Description,
                                                   request.Status.ToString(),
                                                   request.Priority.ToString(),
+                                                  request.TeamId,
+                                                  request.AssigneeUserId,
                                                   request.CreatedAt,
                                                   request.UpdatedAt);
         }

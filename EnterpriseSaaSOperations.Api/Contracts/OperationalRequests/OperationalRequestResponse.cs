@@ -5,6 +5,8 @@
                                                     string Description,
                                                     string Status,
                                                     string Priority,
+                                                    int? TeamId,
+                                                    int? AssigneeUserId,
                                                     DateTimeOffset CreatedAt,
                                                     DateTimeOffset UpdatedAt);
 }

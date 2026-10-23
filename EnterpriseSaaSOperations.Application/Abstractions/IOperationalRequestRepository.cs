@@ -13,5 +13,10 @@ namespace EnterpriseSaaSOperations.Application
         /// Retrieves a request only when it belongs to the specified organization.
         /// </summary>
         Task<OperationalRequest?> GetByIdAsync(int requestId, int organizationId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Retrieves a tracked operational request for modification, provided it belongs to the specified organization.
+        /// </summary>
+        Task<OperationalRequest?> GetByIdForUpdateAsync(int requestId, int organizationId, CancellationToken cancellationToken = default);
     }
 }

@@ -13,6 +13,14 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
             _dbContext.DomainUsers.Add(user);
         }
 
+        public Task<User?> GetByIdAsync(int userId, int organizationId, CancellationToken cancellationToken = default)
+        {
+            return _dbContext.DomainUsers.AsNoTracking()
+                                         .SingleOrDefaultAsync(user => user.Id == userId &&
+                                                                       user.OrganizationId == organizationId,
+                                                               cancellationToken);
+        }
+
         public Task<User?> GetByIdForUpdateAsync(int userId, int organizationId, CancellationToken cancellationToken = default)
         {
             return _dbContext.DomainUsers.SingleOrDefaultAsync(user => user.Id == userId &&

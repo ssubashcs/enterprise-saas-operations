@@ -9,8 +9,8 @@ namespace EnterpriseSaaSOperations.Application.Abstractions
         /// </summary>
         void Add(User user);
 
-        Task<User?> GetByIdForUpdateAsync(int userId,
-                                          int organizationId,
-                                          CancellationToken cancellationToken = default);
+        Task<User?> GetByIdForUpdateAsync(int userId, int organizationId, CancellationToken cancellationToken = default);
+
+        Task<User?> GetByIdAsync(int userId, int organizationId, CancellationToken cancellationToken = default);
     }
 }

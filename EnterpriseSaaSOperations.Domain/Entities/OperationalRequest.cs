@@ -69,17 +69,14 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 
             if (!IsValidTransition(Status, newStatus))
             {
-                throw new InvalidOperationException(
-                    $"Cannot transition request from {Status} to {newStatus}.");
+                throw new InvalidOperationException($"Cannot transition request from {Status} to {newStatus}.");
             }
 
             Status = newStatus;
             UpdatedAt = DateTimeOffset.UtcNow;
         }
 
-        private static bool IsValidTransition(
-            RequestStatus currentStatus,
-            RequestStatus newStatus)
+        private static bool IsValidTransition(RequestStatus currentStatus, RequestStatus newStatus)
         {
             return (currentStatus, newStatus) switch
             {

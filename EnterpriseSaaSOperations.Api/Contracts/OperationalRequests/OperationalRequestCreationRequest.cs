@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EnterpriseSaaSOperations.Api.Contracts.OperationalRequests
 {
-    public sealed class CreateOperationalRequestRequest
+    public sealed class OperationalRequestCreationRequest
     {
         [Required]
         [StringLength(200)]
