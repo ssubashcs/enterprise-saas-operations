@@ -111,6 +111,61 @@ namespace EnterpriseSaaSOperations.Api.Controllers
             };
         }
 
+        [HttpPut("{id:int}/status")]
+        [ProducesResponseType(typeof(RequestStatusChangeResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> ChangeStatus(int id, ChangeRequestStatusRequest request, CancellationToken cancellationToken)
+        {
+            string? identityUserId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId))
+            {
+                return Unauthorized();
+            }
+
+            CurrentUserAccessContext? currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(
+                                                                                            identityUserId,
+                                                                                            cancellationToken);
+
+            if (currentUser is null) return Unauthorized();
+
+            RequestStatusChangeResult result = await _requestService.ChangeStatusAsync(currentUser, id, 
+                                                                                       request.NewStatus!.Value, cancellationToken);
+
+            if (result.Success)
+            {
+                RequestStatusChangeResponse response = new(result.RequestId!.Value, result.PreviousStatus!.Value, 
+                                                           result.Status!.Value, result.UpdatedAt!.Value);
+
+                return Ok(response);
+            }
+
+            return result.Failure switch
+            {
+                RequestStatusChangeFailure.CallerNotAuthorized or
+                RequestStatusChangeFailure.TransitionNotPermittedForRole => Forbid(),
+
+                RequestStatusChangeFailure.RequestNotFound => NotFound(),
+
+                RequestStatusChangeFailure.InvalidStatusValue => BadRequest(
+                    Problem(title: "Invalid status",
+                            detail: "The specified request status is not valid.",
+                            statusCode: StatusCodes.Status400BadRequest)),
+
+                RequestStatusChangeFailure.InvalidTransition => Conflict(
+                    Problem(title: "Invalid status transition",
+                            detail: "The request cannot transition from its current status to the specified status.",
+                            statusCode: StatusCodes.Status409Conflict)),
+
+                _ => Problem(statusCode: StatusCodes.Status500InternalServerError,
+                             title: "An unexpected error occurred")
+            };
+        }
+
         private async Task<CurrentUserAccessContext?> ResolveCurrentUserAsync(CancellationToken cancellationToken)
         {
             var identityUserId = User.FindFirst("sub")?.Value;

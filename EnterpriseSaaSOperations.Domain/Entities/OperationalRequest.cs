@@ -80,7 +80,6 @@ namespace EnterpriseSaaSOperations.Domain.Entities
         {
             return (currentStatus, newStatus) switch
             {
-                (RequestStatus.Created, RequestStatus.Assigned) => true,
                 (RequestStatus.Assigned, RequestStatus.InProgress) => true,
                 (RequestStatus.InProgress, RequestStatus.Resolved) => true,
                 (RequestStatus.Resolved, RequestStatus.Closed) => true,

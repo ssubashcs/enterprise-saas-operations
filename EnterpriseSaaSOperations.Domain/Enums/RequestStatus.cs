@@ -8,12 +8,4 @@
         Resolved,
         Closed
     }
-
-    public enum RequestPriority
-    {
-        Low,
-        Medium,
-        High,
-        Critical
-    }
 }

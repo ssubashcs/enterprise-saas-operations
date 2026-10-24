@@ -87,6 +87,54 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
             return new RequestAssignmentResult(true, request.Id, team.Id, assignee.Id, request.Status, null);
         }
 
+        public async Task<RequestStatusChangeResult> ChangeStatusAsync(CurrentUserAccessContext currentUser, int requestId,
+                                                                       RequestStatus newStatus, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(currentUser);
+
+            if (!Enum.IsDefined(newStatus))
+            {
+                return StatusChangeFailure(RequestStatusChangeFailure.InvalidStatusValue);
+            }
+
+            OperationalRequest? request = await _repository.GetByIdForUpdateAsync(requestId, currentUser.OrganizationId, cancellationToken);
+
+            if (request is null) return StatusChangeFailure(RequestStatusChangeFailure.RequestNotFound);
+
+            bool isAdministratorOrOwner = currentUser.Role is UserRole.Administrator or UserRole.Owner;
+            bool isAssignedMember = currentUser.Role == UserRole.Member && request.AssigneeUserId == currentUser.UserId;
+
+            if (!isAdministratorOrOwner && !isAssignedMember)
+            {
+                return StatusChangeFailure(RequestStatusChangeFailure.CallerNotAuthorized);
+            }
+
+            if (!isAdministratorOrOwner && newStatus is not (RequestStatus.InProgress or RequestStatus.Resolved))
+            {
+                return StatusChangeFailure(RequestStatusChangeFailure.TransitionNotPermittedForRole);
+            }
+
+            RequestStatus previousStatus = request.Status;
+
+            try
+            {
+                request.ChangeStatus(newStatus);
+            }
+            catch (InvalidOperationException)
+            {
+                return StatusChangeFailure(RequestStatusChangeFailure.InvalidTransition);
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return new RequestStatusChangeResult(true, request.Id, previousStatus, request.Status, request.UpdatedAt, null);
+        }
+
+        private static RequestStatusChangeResult StatusChangeFailure(RequestStatusChangeFailure failure)
+        {
+            return new RequestStatusChangeResult(false, null, null, null, null, failure);
+        }
+
         private static RequestAssignmentResult Failure(RequestAssignmentFailure failure)
         {
             return new RequestAssignmentResult(false, null, null, null, null, failure);
