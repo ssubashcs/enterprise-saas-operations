@@ -1,4 +1,5 @@
 ﻿using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Common;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Domain.Enums;
@@ -130,11 +131,51 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
             return new RequestStatusChangeResult(true, request.Id, previousStatus, request.Status, request.UpdatedAt, null);
         }
 
+        /// <summary>
+        /// Retrieves a filtered page of requests belonging to the current user's organization.
+        /// </summary>
+        public async Task<PagedResult<OperationalRequest>> GetPageAsync(CurrentUserAccessContext currentUser, int page, int pageSize,
+                                                                        OperationalRequestFilter filter, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(currentUser);
+            ArgumentNullException.ThrowIfNull(filter);
+
+            ArgumentOutOfRangeException.ThrowIfLessThan(page, 1);
+
+            if (pageSize is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(pageSize));
+
+            if (filter.Status is { } status && !Enum.IsDefined(status))
+            {
+                throw new ArgumentOutOfRangeException(nameof(filter.Status));
+            }
+
+            if (filter.Priority is { } priority && !Enum.IsDefined(priority))
+            {
+                throw new ArgumentOutOfRangeException(nameof(filter.Priority));
+            }
+
+            if (filter.TeamId is <= 0) throw new ArgumentOutOfRangeException(nameof(filter.TeamId));
+
+            if (filter.AssigneeUserId is <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(filter.AssigneeUserId));
+            }
+
+            int skip = checked((page - 1) * pageSize);
+
+            int totalCount = await _repository.CountAsync(currentUser.OrganizationId, filter, cancellationToken);
+
+            IReadOnlyList<OperationalRequest> requests = await _repository.GetPageAsync(currentUser.OrganizationId, skip,
+                                                                                        pageSize, filter, cancellationToken);
+
+            return new PagedResult<OperationalRequest>(requests, page, pageSize, totalCount);
+        }
+                    
         private static RequestStatusChangeResult StatusChangeFailure(RequestStatusChangeFailure failure)
         {
             return new RequestStatusChangeResult(false, null, null, null, null, failure);
         }
-
+        
         private static RequestAssignmentResult Failure(RequestAssignmentFailure failure)
         {
             return new RequestAssignmentResult(false, null, null, null, null, failure);

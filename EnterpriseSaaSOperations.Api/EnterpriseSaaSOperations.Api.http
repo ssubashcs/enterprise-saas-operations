@@ -72,9 +72,9 @@ Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-  "title": "Architecture Verification Request",
-  "description": "Verify the refactored request workflow.",
-  "priority": "Medium"
+  "title": "Code Standards Validation - Sample",
+  "description": "Ensure modules follow coding guidelines.",
+  "priority": "Low"
 }
 
 ### Retrieve operational request
@@ -226,3 +226,15 @@ Content-Type: application/json
 {
     "newStatus": "Closed"
 }
+
+### List opertional requests
+GET {{HostAddress}}/api/requests
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+### List by status and priority
+GET {{HostAddress}}/api/requests?status=Created&priority=High
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+### List by pagination
+GET {{HostAddress}}/api/requests?page=1&pageSize=3
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}

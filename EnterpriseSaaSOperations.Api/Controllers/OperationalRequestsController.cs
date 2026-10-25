@@ -1,11 +1,14 @@
 ﻿using EnterpriseSaaSOperations.Api.Authorization;
+using EnterpriseSaaSOperations.Api.Contracts.Common;
 using EnterpriseSaaSOperations.Api.Contracts.OperationalRequests;
 using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Domain.Entities;
+using EnterpriseSaaSOperations.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {
@@ -166,6 +169,34 @@ namespace EnterpriseSaaSOperations.Api.Controllers
             };
         }
 
+        /// <summary>
+        /// Retrieves a filtered page of requests belonging to the current user's organization.
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(PagedResponse<OperationalRequestResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<PagedResponse<OperationalRequestResponse>>> GetPage(
+                                                [Range(1, 1_000_000)] int page = 1, [Range(1, 100)] int pageSize = 20,
+                                                [EnumDataType(typeof(RequestStatus))] RequestStatus? status = null,
+                                                [EnumDataType(typeof(RequestPriority))] RequestPriority? priority = null,
+                                                [Range(1, int.MaxValue)] int? teamId = null, 
+                                                [Range(1, int.MaxValue)] int? assigneeUserId = null, CancellationToken cancellationToken = default)
+        {
+            var currentUser = await ResolveCurrentUserAsync(cancellationToken);
+
+            if (currentUser is null) return Unauthorized();
+
+            OperationalRequestFilter filter = new(status, priority, teamId, assigneeUserId);
+
+            var result = await _requestService.GetPageAsync(currentUser, page, pageSize, filter, cancellationToken);
+
+            var response = new PagedResponse<OperationalRequestResponse>(result.Items.Select(ToResponse).ToArray(),
+                                                                         result.Page, result.PageSize, result.TotalCount); 
+
+            return Ok(response);
+        }
+
         private async Task<CurrentUserAccessContext?> ResolveCurrentUserAsync(CancellationToken cancellationToken)
         {
             var identityUserId = User.FindFirst("sub")?.Value;
@@ -177,15 +208,10 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
         private static OperationalRequestResponse ToResponse(OperationalRequest request)
         {
-            return new OperationalRequestResponse(request.Id,
-                                                  request.Title,
-                                                  request.Description,
-                                                  request.Status.ToString(),
-                                                  request.Priority.ToString(),
-                                                  request.TeamId,
-                                                  request.AssigneeUserId,
-                                                  request.CreatedAt,
-                                                  request.UpdatedAt);
+            return new OperationalRequestResponse(request.Id, request.Title, request.Description,
+                                                  request.Status.ToString(), request.Priority.ToString(),
+                                                  request.TeamId, request.AssigneeUserId,
+                                                  request.CreatedAt, request.UpdatedAt);
         }
     }
 }

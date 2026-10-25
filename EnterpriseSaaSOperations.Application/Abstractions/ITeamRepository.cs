@@ -18,6 +18,9 @@ namespace EnterpriseSaaSOperations.Application.Abstractions
         /// </summary>
         Task<IReadOnlyList<Team>> GetPageAsync(int organizationId, int skip, int take, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Asynchronously counts the number of teams associated with the specified organization.
+        /// </summary>
         Task<int> CountByOrganizationAsync(int organizationId, CancellationToken cancellationToken = default);
     }
 }
