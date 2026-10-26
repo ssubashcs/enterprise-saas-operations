@@ -1,6 +1,7 @@
 ﻿using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Api.Contracts.Members;
 using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Application.Members;
 using EnterpriseSaaSOperations.Application.Teams;
 using EnterpriseSaaSOperations.Domain.Enums;
@@ -37,11 +38,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<MemberProvisioningResponse>> Create(CreateMemberRequest request, CancellationToken cancellationToken)
         {
-            var identityUserId = User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
-
-            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+            var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
             if (currentUser is null) return Unauthorized();
 
@@ -50,32 +47,33 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
             if (!result.Succeeded)
             {
-                if (result.Failure == MemberProvisioningFailure.TeamNotFound)
+                return result.Failure switch
                 {
-                    return NotFound(new ProblemDetails
-                    {
-                        Status = StatusCodes.Status404NotFound,
-                        Title = "Team not found.",
-                        Detail = "The selected team was not found in your organization."
-                    });
-                }
+                    MemberProvisioningFailure.TeamNotFound =>
+                        NotFound(new ProblemDetails
+                        {
+                            Status = StatusCodes.Status404NotFound,
+                            Title = "Team not found.",
+                            Detail = "The selected team was not found in your organization."
+                        }),
 
-                // Avoid exposing raw Identity errors, which might reveal
-                // whether an email address is already registered.
-                var errors = new Dictionary<string, string[]>
-                {
-                    ["account"] =
-                    [
-                        "The member account could not be created. " +
-                        "Check the email address and password requirements."
-                    ]
+                    MemberProvisioningFailure.IdentityAccountCreationFailed =>
+                        BadRequest(new ValidationProblemDetails(
+                            new Dictionary<string, string[]>
+                            {
+                                ["account"] =
+                                [
+                                    "The member account could not be created. " +
+                                    "Check the email address and password requirements."
+                                ]
+                            })
+                        {
+                            Status = StatusCodes.Status400BadRequest,
+                            Title = "Member provisioning failed."
+                        }),
+
+                    _ => throw new InvalidOperationException($"Unexpected member-provisioning failure: {result.Failure}.")
                 };
-
-                return BadRequest(new ValidationProblemDetails(errors)
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Member provisioning failed."
-                });
             }
 
             if (result.MemberUserId is not int memberUserId)
@@ -86,8 +84,6 @@ namespace EnterpriseSaaSOperations.Api.Controllers
             var response = new MemberProvisioningResponse(memberUserId, currentUser.OrganizationId, result.TeamId,
                                                           request.Name.Trim(), request.Email.Trim(), "Member");
 
-            // Member retrieval is not exposed by this controller yet,
-            // so there is no resource URL to provide in a Location header.
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
@@ -101,11 +97,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<MemberRoleChangeResponse>> ChangeRole(int id, ChangeMemberRoleRequest request, CancellationToken cancellationToken)
         {
-            var identityUserId = User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
-
-            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+            var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
             if (currentUser is null) return Unauthorized();
 
@@ -161,11 +153,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TeamMembershipResponse>> AssignToTeam(int id, AssignMemberToTeamRequest request, CancellationToken cancellationToken)
         {
-            var identityUserId = User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
-
-            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+            var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
             if (currentUser is null) return Unauthorized();
 
@@ -201,11 +189,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RemoveFromTeam(int id, CancellationToken cancellationToken)
         {
-            var identityUserId = User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
-
-            var currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+            var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
             if (currentUser is null) return Unauthorized();
 
@@ -220,6 +204,15 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
                 _ => throw new InvalidOperationException($"Unexpected team membership failure: {result.Failure}.")
             };
+        }
+
+        private async Task<CurrentUserAccessContext?> ResolveCurrentUserAsync(CancellationToken cancellationToken)
+        {
+            string? identityUserId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId)) return null;
+
+            return await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
         }
     }
 }

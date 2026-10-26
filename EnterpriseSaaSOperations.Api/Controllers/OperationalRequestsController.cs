@@ -30,7 +30,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(OperationalRequestResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<OperationalRequestResponse>> Create(OperationalRequestCreationRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<OperationalRequestResponse>> Create(CreateOperationalRequestDto request, CancellationToken cancellationToken)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
@@ -69,13 +69,9 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Assign(int id, OperationalRequestAssignmentRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Assign(int id, AssignOperationalRequestDto request, CancellationToken cancellationToken)
         {
-            string? identityUserId = User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrWhiteSpace(identityUserId)) return Unauthorized();
-
-            CurrentUserAccessContext? currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(identityUserId, cancellationToken);
+            CurrentUserAccessContext? currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
             if (currentUser is null) return Unauthorized();
 
@@ -109,8 +105,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                                                                                   detail: "The request's current status does not permit assignment.",
                                                                                   statusCode: StatusCodes.Status409Conflict)),
 
-                _ => Problem(statusCode: StatusCodes.Status500InternalServerError,
-                             title: "An unexpected error occurred")
+                _ => throw new InvalidOperationException($"Unexpected operational-request assignment failure: {result.Failure}.")
             };
         }
 
@@ -121,18 +116,9 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> ChangeStatus(int id, ChangeRequestStatusRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ChangeStatus(int id, ChangeOperationalRequestStatusDto request, CancellationToken cancellationToken)
         {
-            string? identityUserId = User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrWhiteSpace(identityUserId))
-            {
-                return Unauthorized();
-            }
-
-            CurrentUserAccessContext? currentUser = await _currentUserContextService.GetByIdentityUserIdAsync(
-                                                                                            identityUserId,
-                                                                                            cancellationToken);
+            CurrentUserAccessContext? currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
             if (currentUser is null) return Unauthorized();
 
@@ -164,8 +150,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                             detail: "The request cannot transition from its current status to the specified status.",
                             statusCode: StatusCodes.Status409Conflict)),
 
-                _ => Problem(statusCode: StatusCodes.Status500InternalServerError,
-                             title: "An unexpected error occurred")
+                _ => throw new InvalidOperationException($"Unexpected operational-request status-change failure: {result.Failure}.")
             };
         }
 
@@ -199,7 +184,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
         private async Task<CurrentUserAccessContext?> ResolveCurrentUserAsync(CancellationToken cancellationToken)
         {
-            var identityUserId = User.FindFirst("sub")?.Value;
+            string? identityUserId = User.FindFirst("sub")?.Value;
 
             if (string.IsNullOrWhiteSpace(identityUserId)) return null;
 

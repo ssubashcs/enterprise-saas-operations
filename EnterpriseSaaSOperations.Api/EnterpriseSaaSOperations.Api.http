@@ -205,13 +205,13 @@ DELETE {{HostAddress}}/api/members/1005/team
 Authorization: Bearer {{memberLogin2.response.body.$.accessToken}}
 
 ### Assign the request
-PUT {{HostAddress}}/api/requests/2/assign
+PUT {{HostAddress}}/api/requests/1002/assign
 Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-  "teamId": 1,
-  "assigneeUserId": 1004
+  "teamId": 2,
+  "assigneeUserId": 1005
 }
 
 ### Retrieve operational request
@@ -219,12 +219,12 @@ GET {{HostAddress}}/api/requests/1
 Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
 
 ### Change request status
-PUT {{HostAddress}}/api/requests/1/status
-Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+PUT {{HostAddress}}/api/requests/1002/status
+Authorization: Bearer {{memberLogin2.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-    "newStatus": "Closed"
+    "newStatus": "InProgress"
 }
 
 ### List opertional requests

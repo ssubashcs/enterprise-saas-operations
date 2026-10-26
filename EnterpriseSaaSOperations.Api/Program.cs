@@ -90,10 +90,19 @@ namespace EnterpriseSaaSOperations.Api
                             .AddScoped<MemberRoleManagementService>()
                             .AddScoped<TeamMembershipService>();
 
+            // registers the Problem Details service.
+            builder.Services.AddProblemDetails();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            // middleware to handle unhandled exceptions and generate an appropriate error response.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

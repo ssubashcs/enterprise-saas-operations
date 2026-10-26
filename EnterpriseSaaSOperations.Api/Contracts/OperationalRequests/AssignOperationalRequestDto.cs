@@ -2,7 +2,7 @@
 
 namespace EnterpriseSaaSOperations.Api.Contracts.OperationalRequests
 {
-    public class OperationalRequestAssignmentRequest
+    public sealed class AssignOperationalRequestDto
     {
         [Range(1, int.MaxValue)]
         public int TeamId { get; init; }
