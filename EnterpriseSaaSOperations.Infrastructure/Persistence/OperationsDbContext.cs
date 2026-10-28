@@ -1,4 +1,5 @@
-﻿using EnterpriseSaaSOperations.Domain.Entities;
+﻿using EnterpriseSaaSOperations.Application.Auditing;
+using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,8 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
         public DbSet<User> DomainUsers => Set<User>();
 
         public DbSet<Team> Teams => Set<Team>();
+
+        public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
         public DbSet<OperationalRequest> OperationalRequests => Set<OperationalRequest>();
 
@@ -109,6 +112,31 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                 entity.HasIndex(request => new { request.OrganizationId, request.AssigneeUserId });
 
                 entity.HasIndex(request => new { request.OrganizationId, request.TeamId });
+            });
+
+            modelBuilder.Entity<AuditEntry>(entity =>
+            {
+                entity.HasKey(audit => audit.Id);
+
+                entity.Property(audit => audit.Action).HasConversion<string>().HasMaxLength(100).IsRequired();
+
+                entity.Property(audit => audit.TargetType).HasConversion<string>().HasMaxLength(100).IsRequired();
+
+                entity.Property(audit => audit.OccurredAtUtc).IsRequired();
+
+                entity.Property(audit => audit.DetailsJson).HasMaxLength(4000);
+
+                entity.HasOne<Organization>().WithMany().HasForeignKey(audit => audit.OrganizationId)
+                                                        .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<User>().WithMany().HasForeignKey(audit => new { audit.OrganizationId, audit.ActorUserId })
+                                                .HasPrincipalKey(user => new { user.OrganizationId, user.Id })
+                                                .OnDelete(DeleteBehavior.Restrict);
+
+                // supports querying an organization's audit history chronologically.
+                entity.HasIndex(audit => new { audit.OrganizationId, audit.OccurredAtUtc });
+
+                entity.HasIndex(audit => new { audit.OrganizationId, audit.TargetType, audit.TargetId });
             });
         }
     }

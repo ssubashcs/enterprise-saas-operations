@@ -10,7 +10,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection")
+            string connectionString = configuration.GetConnectionString("DefaultConnection")
                                                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
             services.AddDbContext<OperationsDbContext>(options => options.UseSqlServer(connectionString));
@@ -19,7 +19,8 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
                     .AddScoped<IOrganizationRepository, OrganizationRepository>()
                     .AddScoped<IDomainUserRepository, DomainUserRepository>()
                     .AddScoped<IUnitOfWork, EfCoreUnitOfWork>()
-                    .AddScoped<ITeamRepository, TeamRepository>();
+                    .AddScoped<ITeamRepository, TeamRepository>()
+                    .AddScoped<IAuditLogRepository, AuditLogRepository>();
 
             return services;
         }

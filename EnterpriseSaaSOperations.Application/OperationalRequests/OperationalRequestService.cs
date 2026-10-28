@@ -1,8 +1,10 @@
 ﻿using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Auditing;
 using EnterpriseSaaSOperations.Application.Common;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Domain.Enums;
+using System.Text.Json;
 
 namespace EnterpriseSaaSOperations.Application.OperationalRequests
 {
@@ -10,17 +12,19 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
     /// Coordinates operational-request creation and retrieval.
     /// </summary>
     public sealed class OperationalRequestService(IOperationalRequestRepository repository, ITeamRepository teamRepository,
-                                                  IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork)
+                                                  IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork,
+                                                  IAuditLogRepository auditLogRepository)
     {
         private readonly IOperationalRequestRepository _repository = repository;
         private readonly ITeamRepository _teamRepository = teamRepository;
         private readonly IDomainUserRepository _domainUserRepository = domainUserRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IAuditLogRepository _auditLogRepository = auditLogRepository;
 
         /// <summary>
         /// Creates a request for the authenticated user's organization.
         /// </summary>
-        public async Task<OperationalRequest> CreateAsync(CurrentUserAccessContext currentUser, string title, 
+        public async Task<OperationalRequest> CreateAsync(CurrentUserAccessContext currentUser, string title,
                                                           string description, RequestPriority priority,
                                                           CancellationToken cancellationToken = default)
         {
@@ -74,6 +78,17 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
                 return Failure(RequestAssignmentFailure.AssigneeNotInTeam);
             }
 
+            if (request.Status == RequestStatus.Assigned && request.TeamId == team.Id &&
+                                                            request.AssigneeUserId == assignee.Id)
+            {
+                return new RequestAssignmentResult(true, request.Id, request.TeamId, request.AssigneeUserId,
+                                                   request.Status, null);
+            }
+
+            RequestStatus previousStatus = request.Status;
+            int? previousTeamId = request.TeamId;
+            int? previousAssigneeUserId = request.AssigneeUserId;
+
             try
             {
                 request.Assign(team.Id, assignee.Id);
@@ -82,6 +97,21 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
             {
                 return Failure(RequestAssignmentFailure.InvalidRequestStatus);
             }
+
+            string detailsJson = JsonSerializer.Serialize(new
+            {
+                previousStatus = previousStatus.ToString(),
+                previousTeamId,
+                previousAssigneeUserId,
+                newStatus = request.Status.ToString(),
+                newTeamId = request.TeamId,
+                newAssigneeUserId = request.AssigneeUserId
+            });
+
+            AuditEntry auditEntry = new(currentUser.OrganizationId, currentUser.UserId, AuditAction.OperationalRequestAssigned,
+                                        AuditTargetType.OperationalRequest, request.Id, request.UpdatedAt, detailsJson);
+
+            _auditLogRepository.Add(auditEntry);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -125,6 +155,18 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
             {
                 return StatusChangeFailure(RequestStatusChangeFailure.InvalidTransition);
             }
+
+            // converts a C# object into a JSON string.
+            string detailsJson = JsonSerializer.Serialize(new
+            {
+                previousStatus = previousStatus.ToString(),
+                newStatus = request.Status.ToString()
+            });
+
+            AuditEntry auditEntry = new(currentUser.OrganizationId, currentUser.UserId, AuditAction.OperationalRequestStatusChanged,
+                                        AuditTargetType.OperationalRequest, request.Id, request.UpdatedAt, detailsJson);
+
+            _auditLogRepository.Add(auditEntry);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -170,12 +212,12 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
 
             return new PagedResult<OperationalRequest>(requests, page, pageSize, totalCount);
         }
-                    
+
         private static RequestStatusChangeResult StatusChangeFailure(RequestStatusChangeFailure failure)
         {
             return new RequestStatusChangeResult(false, null, null, null, null, failure);
         }
-        
+
         private static RequestAssignmentResult Failure(RequestAssignmentFailure failure)
         {
             return new RequestAssignmentResult(false, null, null, null, null, failure);
