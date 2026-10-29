@@ -4,6 +4,7 @@ using EnterpriseSaaSOperations.Application.Common;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace EnterpriseSaaSOperations.Application.OperationalRequests
@@ -13,13 +14,14 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
     /// </summary>
     public sealed class OperationalRequestService(IOperationalRequestRepository repository, ITeamRepository teamRepository,
                                                   IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork,
-                                                  IAuditLogRepository auditLogRepository)
+                                                  IAuditLogRepository auditLogRepository, ILogger<OperationalRequestService> logger)
     {
         private readonly IOperationalRequestRepository _repository = repository;
         private readonly ITeamRepository _teamRepository = teamRepository;
         private readonly IDomainUserRepository _domainUserRepository = domainUserRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IAuditLogRepository _auditLogRepository = auditLogRepository;
+        private readonly ILogger<OperationalRequestService> _logger = logger;
 
         /// <summary>
         /// Creates a request for the authenticated user's organization.
@@ -153,6 +155,12 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
             }
             catch (InvalidOperationException)
             {
+                // the log message is just additional diagnostic information.
+                _logger.LogInformation("Status transition rejected for request {RequestId}. " +
+                                       "Current status: {CurrentStatus}; requested status: {RequestedStatus}; " +
+                                       "actor user: {ActorUserId}; organization: {OrganizationId}.",
+                                       request.Id, request.Status, newStatus, currentUser.UserId, currentUser.OrganizationId);
+
                 return StatusChangeFailure(RequestStatusChangeFailure.InvalidTransition);
             }
 

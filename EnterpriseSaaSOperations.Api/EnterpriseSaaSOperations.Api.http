@@ -1,4 +1,5 @@
 @HostAddress = https://localhost:7282
+@HostHttp = http://localhost:5006
 
 ###
 POST {{HostAddress}}/api/organizations
@@ -13,7 +14,7 @@ Content-Type: application/json
 
 ###
 # @name ownerLogin1
-POST {{HostAddress}}/api/auth/login
+POST {{HostHttp}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -215,16 +216,16 @@ Content-Type: application/json
 }
 
 ### Retrieve operational request
-GET {{HostAddress}}/api/requests/1
-Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+GET {{HostAddress}}/api/requests/1002
+Authorization: Bearer {{memberLogin2.response.body.$.accessToken}}
 
 ### Change request status
-PUT {{HostAddress}}/api/requests/1003/status
-Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+PUT {{HostHttp}}/api/requests/1002/status
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-    "newStatus": "Closed"
+    "newStatus": "Resolved"
 }
 
 ### List opertional requests
