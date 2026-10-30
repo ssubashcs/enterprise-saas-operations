@@ -239,3 +239,142 @@ Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
 ### List by pagination
 GET {{HostAddress}}/api/requests?page=1&pageSize=3
 Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+### E2E: REVIEW
+POST {{HostAddress}}/api/organizations
+Content-Type: application/json
+
+{
+  "organizationName": "E2E Test Organization",
+  "ownerName": "E2E Test Owner",
+  "email": "endorg@gmail.com",
+  "password": "Test7pass$"
+}
+
+### Log in as the Owner
+# @name e2eOwnerLogin
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "endorg@gmail.com",
+  "password": "Test7pass$"
+}
+
+### Verify the Owner's identity
+GET {{HostAddress}}/api/auth/me
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Create a team
+# @name e2eCreateTeam
+POST {{HostAddress}}/api/teams
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "E2E Operations Team"
+}
+
+### Retrive the team
+GET {{HostAddress}}/api/teams/{{e2eCreateTeam.response.body.$.id}}
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Create a member
+# @name e2eCreateMember
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Member 1",
+  "email": "testmember1@email.com",
+  "password": "testMember1)"
+}
+
+### Assign member to team
+# @name e2eAssignMemberToTeam
+PUT {{HostAddress}}/api/members/{{e2eCreateMember.response.body.$.userId}}/team
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "teamId": 1002
+}
+
+### Promote and Demote
+# @name e2ePromoteMember
+PUT {{HostAddress}}/api/members/{{e2eCreateMember.response.body.$.userId}}/role
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "Member"
+}
+
+### Create an operational request
+# @name e2eCreateRequest
+POST {{HostAddress}}/api/requests
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "title": "E2E Infrastructure Issue",
+  "description": "Investigate an infrastructure issue reported by the operations team.",
+  "priority": "High"
+}
+
+### Assign operational request
+# @name e2eAssignRequest
+PUT {{HostAddress}}/api/requests/{{e2eCreateRequest.response.body.$.id}}/assign
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "teamId": 1002,
+  "assigneeUserId": {{e2eCreateMember.response.body.$.userId}}
+}
+
+### Log in as the Member
+# @name e2eMemberLogin
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testmember1@email.com",
+  "password": "testMember1)"
+}
+
+### Process request status
+# @name e2eStartRequest
+PUT {{HostAddress}}/api/requests/{{e2eCreateRequest.response.body.$.id}}/status
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "newStatus": "Closed"
+}
+
+### List teams
+GET {{HostAddress}}/api/teams
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### List requests
+GET {{HostAddress}}/api/requests
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Cross-organization team access
+GET {{HostAddress}}/api/teams/1002
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Cross-organization request access
+GET {{HostAddress}}/api/requests/1006
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Cross-organization member role change
+PUT {{HostAddress}}/api/members/1005/role
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "Administrator"
+}
