@@ -4,16 +4,16 @@ using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Domain.Enums;
 using System.Text.Json;
 
-namespace EnterpriseSaaSOperations.Application.Members
+namespace EnterpriseSaaSOperations.Application.Users
 {
-    public class MemberRoleManagementService(IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork,
-                                             IAuditLogRepository auditLogRepository)
+    public class UserRoleManagementService(IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork,
+                                           IAuditLogRepository auditLogRepository)
     {
         private readonly IDomainUserRepository _domainUserRepository = domainUserRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IAuditLogRepository _auditLogRepository = auditLogRepository;
 
-        public async Task<MemberRoleChangeResult> ChangeRoleAsync(CurrentUserAccessContext currentUser, int targetUserId,
+        public async Task<UserRoleChangeResult> ChangeRoleAsync(CurrentUserAccessContext currentUser, int targetUserId,
                                                                   UserRole newRole, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(currentUser);
@@ -21,29 +21,29 @@ namespace EnterpriseSaaSOperations.Application.Members
 
             if (currentUser.Role != UserRole.Owner)
             {
-                return new MemberRoleChangeResult(false, null, null, MemberRoleChangeFailure.CallerNotOwner);
+                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.CallerNotOwner);
             }
 
             if (!Enum.IsDefined(newRole))
             {
-                return new MemberRoleChangeResult(false, null, null, MemberRoleChangeFailure.InvalidRole);
+                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.InvalidRole);
             }
 
             if (newRole == UserRole.Owner)
             {
-                return new MemberRoleChangeResult(false, null, null, MemberRoleChangeFailure.OwnerRoleCannotBeAssigned); 
+                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.OwnerRoleCannotBeAssigned); 
             }
 
             var targetUser = await _domainUserRepository.GetByIdForUpdateAsync(targetUserId, currentUser.OrganizationId, cancellationToken);
 
             if (targetUser is null)
             {
-                return new MemberRoleChangeResult(false, null, null, MemberRoleChangeFailure.UserNotFound);
+                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.UserNotFound);
             }
 
             if (targetUser.Role == UserRole.Owner)
             {
-                return new MemberRoleChangeResult(false, null, null, MemberRoleChangeFailure.OwnerRoleCannotBeChanged);
+                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.OwnerRoleCannotBeChanged);
             }
 
             UserRole previousRole = targetUser.Role;
@@ -66,7 +66,7 @@ namespace EnterpriseSaaSOperations.Application.Members
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new MemberRoleChangeResult(true, targetUser.Id, targetUser.Role, null);
+            return new UserRoleChangeResult(true, targetUser.Id, targetUser.Role, null);
         }
     }   
 }

@@ -303,12 +303,12 @@ Content-Type: application/json
 
 ### Promote and Demote
 # @name e2ePromoteMember
-PUT {{HostAddress}}/api/members/{{e2eCreateMember.response.body.$.userId}}/role
+PUT {{HostAddress}}/api/users/1005/role
 Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-  "role": "Member"
+  "role": "Administrator"
 }
 
 ### Create an operational request

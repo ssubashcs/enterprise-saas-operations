@@ -5,6 +5,7 @@ using EnterpriseSaaSOperations.Application.Members;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Application.Organizations;
 using EnterpriseSaaSOperations.Application.Teams;
+using EnterpriseSaaSOperations.Application.Users;
 using EnterpriseSaaSOperations.Domain.Enums;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
@@ -87,7 +88,7 @@ namespace EnterpriseSaaSOperations.Api
                             .AddScoped<OperationalRequestService>()
                             .AddScoped<TeamManagementService>()
                             .AddScoped<MemberProvisioningService>()
-                            .AddScoped<MemberRoleManagementService>()
+                            .AddScoped<UserRoleManagementService>()
                             .AddScoped<TeamMembershipService>();
 
             // registers the Problem Details service.

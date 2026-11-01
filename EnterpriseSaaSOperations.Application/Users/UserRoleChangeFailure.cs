@@ -1,6 +1,6 @@
-﻿namespace EnterpriseSaaSOperations.Application.Members
+﻿namespace EnterpriseSaaSOperations.Application.Users
 {
-    public enum MemberRoleChangeFailure
+    public enum UserRoleChangeFailure
     {
         CallerNotOwner,
         UserNotFound,

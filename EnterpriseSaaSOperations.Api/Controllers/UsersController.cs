@@ -4,6 +4,7 @@ using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Application.Members;
 using EnterpriseSaaSOperations.Application.Teams;
+using EnterpriseSaaSOperations.Application.Users;
 using EnterpriseSaaSOperations.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +14,15 @@ namespace EnterpriseSaaSOperations.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class MembersController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly ICurrentUserContextService _currentUserContextService;
         private readonly MemberProvisioningService _memberProvisioningService;
-        private readonly MemberRoleManagementService _memberRoleManagementService;
+        private readonly UserRoleManagementService _memberRoleManagementService;
         private readonly TeamMembershipService _teamMembershipService;
 
-        public MembersController(ICurrentUserContextService currentUserContextService, MemberProvisioningService memberProvisioningService,
-                                 MemberRoleManagementService memberRoleManagementService, TeamMembershipService teamMembershipService)
+        public UsersController(ICurrentUserContextService currentUserContextService, MemberProvisioningService memberProvisioningService,
+                               UserRoleManagementService memberRoleManagementService, TeamMembershipService teamMembershipService)
         {
             _currentUserContextService = currentUserContextService;
             _memberProvisioningService = memberProvisioningService;
@@ -115,25 +116,25 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
             return result.Failure switch
             {
-                MemberRoleChangeFailure.CallerNotOwner => Forbid(),
+                UserRoleChangeFailure.CallerNotOwner => Forbid(),
 
-                MemberRoleChangeFailure.UserNotFound => NotFound(),
+                UserRoleChangeFailure.UserNotFound => NotFound(),
 
-                MemberRoleChangeFailure.InvalidRole => BadRequest(new ProblemDetails
+                UserRoleChangeFailure.InvalidRole => BadRequest(new ProblemDetails
                 {
                     Status = StatusCodes.Status400BadRequest,
                     Title = "Invalid role.",
                     Detail = "The requested role is not supported."
                 }),
 
-                MemberRoleChangeFailure.OwnerRoleCannotBeAssigned => BadRequest(new ProblemDetails
+                UserRoleChangeFailure.OwnerRoleCannotBeAssigned => BadRequest(new ProblemDetails
                 {
                     Status = StatusCodes.Status400BadRequest,
                     Title = "Invalid role change.",
                     Detail = "The Owner role cannot be assigned through this operation."
                 }),
 
-                MemberRoleChangeFailure.OwnerRoleCannotBeChanged => Conflict(new ProblemDetails
+                UserRoleChangeFailure.OwnerRoleCannotBeChanged => Conflict(new ProblemDetails
                 {
                     Status = StatusCodes.Status409Conflict,
                     Title = "Role change conflict.",
