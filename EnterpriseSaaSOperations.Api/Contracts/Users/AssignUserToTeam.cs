@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EnterpriseSaaSOperations.Api.Contracts.Members
+namespace EnterpriseSaaSOperations.Api.Contracts.Users
 {
-    public sealed class AssignMemberToTeamRequest
+    public sealed class AssignUserToTeam
     {
         [Required]
         [Range(1, int.MaxValue)]

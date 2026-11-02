@@ -279,21 +279,21 @@ Content-Type: application/json
 GET {{HostAddress}}/api/teams/{{e2eCreateTeam.response.body.$.id}}
 Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
 
-### Create a member
+### Create a user
 # @name e2eCreateMember
-POST {{HostAddress}}/api/members
+POST {{HostAddress}}/api/users
 Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-  "name": "Test Member 1",
-  "email": "testmember1@email.com",
-  "password": "testMember1)"
+  "name": "Test Member 2",
+  "email": "testmember2@email.com",
+  "password": "testMember2)"
 }
 
-### Assign member to team
+### Assign user to team
 # @name e2eAssignMemberToTeam
-PUT {{HostAddress}}/api/members/{{e2eCreateMember.response.body.$.userId}}/team
+PUT {{HostAddress}}/api/users/{{e2eCreateMember.response.body.$.userId}}/team
 Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
 Content-Type: application/json
 
@@ -301,14 +301,18 @@ Content-Type: application/json
   "teamId": 1002
 }
 
+### Remove user from a team
+DELETE {{HostAddress}}/api/users/{{e2eCreateMember.response.body.$.userId}}/team
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
 ### Promote and Demote
 # @name e2ePromoteMember
-PUT {{HostAddress}}/api/users/1005/role
+PUT {{HostAddress}}/api/users/2010/role
 Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
-  "role": "Administrator"
+  "role": "Member"
 }
 
 ### Create an operational request

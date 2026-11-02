@@ -1,4 +1,4 @@
-﻿namespace EnterpriseSaaSOperations.Api.Contracts.Members
+﻿namespace EnterpriseSaaSOperations.Api.Contracts.Users
 {
     public sealed record TeamMembershipResponse(int UserId,
                                                 int? TeamId);

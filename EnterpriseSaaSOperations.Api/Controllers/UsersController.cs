@@ -1,5 +1,5 @@
 ﻿using EnterpriseSaaSOperations.Api.Authorization;
-using EnterpriseSaaSOperations.Api.Contracts.Members;
+using EnterpriseSaaSOperations.Api.Contracts.Users;
 using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Application.Members;
@@ -32,12 +32,12 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.AdministratorOrOwner)]
-        [ProducesResponseType(typeof(MemberProvisioningResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(CreateUserResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<MemberProvisioningResponse>> Create(CreateMemberRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateUserResponse>> Create(CreateUserRequest request, CancellationToken cancellationToken)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
@@ -82,7 +82,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                 throw new InvalidOperationException("Successful provisioning must return the member's ID.");
             }
 
-            var response = new MemberProvisioningResponse(memberUserId, currentUser.OrganizationId, result.TeamId,
+            var response = new CreateUserResponse(memberUserId, currentUser.OrganizationId, result.TeamId,
                                                           request.Name.Trim(), request.Email.Trim(), "Member");
 
             return StatusCode(StatusCodes.Status201Created, response);
@@ -90,13 +90,13 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
         [HttpPut("{id:int}/role")]
         [Authorize(Policy = AuthorizationPolicies.OwnerOnly)]
-        [ProducesResponseType(typeof(MemberRoleChangeResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserRoleChangeResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<MemberRoleChangeResponse>> ChangeRole(int id, ChangeMemberRoleRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<UserRoleChangeResponse>> ChangeRole(int id, ChangeUserRoleRequest request, CancellationToken cancellationToken)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
@@ -111,7 +111,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                     throw new InvalidOperationException("A successful role change must return the user ID and role.");
                 }
 
-                return Ok(new MemberRoleChangeResponse(userId, role.ToString()));
+                return Ok(new UserRoleChangeResponse(userId, role.ToString()));
             }
 
             return result.Failure switch
@@ -152,7 +152,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<TeamMembershipResponse>> AssignToTeam(int id, AssignMemberToTeamRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<TeamMembershipResponse>> AssignToTeam(int id, AssignUserToTeam request, CancellationToken cancellationToken)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 

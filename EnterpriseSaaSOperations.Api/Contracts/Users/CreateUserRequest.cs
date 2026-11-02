@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EnterpriseSaaSOperations.Api.Contracts.Members
+namespace EnterpriseSaaSOperations.Api.Contracts.Users
 {
-    public sealed class CreateMemberRequest
+    public sealed class CreateUserRequest
     {
         [Required]
         [StringLength(100)]

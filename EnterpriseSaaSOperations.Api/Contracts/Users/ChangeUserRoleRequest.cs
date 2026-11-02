@@ -1,9 +1,9 @@
 ﻿using EnterpriseSaaSOperations.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace EnterpriseSaaSOperations.Api.Contracts.Members
+namespace EnterpriseSaaSOperations.Api.Contracts.Users
 {
-    public sealed class ChangeMemberRoleRequest
+    public sealed class ChangeUserRoleRequest
     {
         /// <summary>
         /// The role to assign to the target user. Only Member and Administrator are permitted through this operation.
