@@ -5,7 +5,7 @@
     /// </summary>
     public enum AuditTargetType
     {
-        Member,
+        User,
         OperationalRequest
     }
 }

@@ -14,7 +14,7 @@ namespace EnterpriseSaaSOperations.Application.Users
         private readonly IAuditLogRepository _auditLogRepository = auditLogRepository;
 
         public async Task<UserRoleChangeResult> ChangeRoleAsync(CurrentUserAccessContext currentUser, int targetUserId,
-                                                                  UserRole newRole, CancellationToken cancellationToken = default)
+                                                                UserRole newRole, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(currentUser);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(targetUserId);
@@ -58,8 +58,8 @@ namespace EnterpriseSaaSOperations.Application.Users
                     newRole = targetUser.Role.ToString()
                 });
 
-                AuditEntry auditEntry = new(currentUser.OrganizationId, currentUser.UserId, AuditAction.MemberRoleChanged,
-                                            AuditTargetType.Member, targetUser.Id, DateTimeOffset.UtcNow, detailsJson);
+                AuditEntry auditEntry = new(currentUser.OrganizationId, currentUser.UserId, AuditAction.UserRoleChanged,
+                                            AuditTargetType.User, targetUser.Id, DateTimeOffset.UtcNow, detailsJson);
 
                 _auditLogRepository.Add(auditEntry);
             }

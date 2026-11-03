@@ -5,7 +5,7 @@
     /// </summary>
     public enum AuditAction
     {
-        MemberRoleChanged,
+        UserRoleChanged,
         OperationalRequestAssigned, 
         OperationalRequestStatusChanged
     }
