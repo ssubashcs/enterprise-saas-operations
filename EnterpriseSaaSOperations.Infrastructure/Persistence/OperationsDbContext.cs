@@ -1,8 +1,9 @@
-﻿using EnterpriseSaaSOperations.Application.Auditing;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+using EnterpriseSaaSOperations.Application.Auditing;
 using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 {
@@ -23,121 +24,8 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-        
-            modelBuilder.Entity<ApplicationIdentityUser>(entity =>
-            {
-                entity.Property(user => user.DomainUserId).IsRequired();
-        
-                // one-to-one relationship
-                entity.HasOne<User>().WithOne().HasForeignKey<ApplicationIdentityUser>(user => user.DomainUserId)
-                                               .OnDelete(DeleteBehavior.Restrict);
-            });
-        
-            modelBuilder.Entity<Organization>(entity =>
-            {
-                entity.HasKey(organization => organization.Id);
 
-                entity.Property(organization => organization.Name).IsRequired().HasMaxLength(200);
-
-                entity.Property(organization => organization.CreatedAt).IsRequired();
-            });
-
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.ToTable("Users");
-
-                entity.HasKey(user => user.Id);
-
-                entity.Property(user => user.Name).IsRequired().HasMaxLength(100);
-
-                entity.Property(user => user.Email).IsRequired().HasMaxLength(320);
-
-                entity.Property(user => user.CreatedAt).IsRequired();
-
-                entity.HasOne<Organization>().WithMany().HasForeignKey(user => user.OrganizationId)
-                                                        .OnDelete(DeleteBehavior.Restrict);
-                                                                                            
-                // one - to - many relationship
-                entity.HasOne<Team>().WithMany().HasForeignKey(user => new { user.OrganizationId,  user.TeamId })
-                                                .HasPrincipalKey(team => new { team.OrganizationId, team.Id })
-                                                .OnDelete(DeleteBehavior.Restrict);
-            });
-
-            modelBuilder.Entity<Team>(entity =>
-            {
-                entity.HasKey(team => team.Id);
-
-                entity.Property(team => team.Name).IsRequired().HasMaxLength(100);
-
-                entity.Property(team => team.CreatedAt).IsRequired();
-
-                entity.HasOne<Organization>().WithMany().HasForeignKey(team => team.OrganizationId)
-                                                        .OnDelete(DeleteBehavior.Restrict);
-            });
-
-            modelBuilder.Entity<OperationalRequest>(entity =>
-            {
-                entity.HasKey(request => request.Id);
-
-                entity.Property(request => request.Title).IsRequired().HasMaxLength(200);
-
-                entity.Property(request => request.Description).IsRequired().HasMaxLength(2000);
-
-                entity.Property(request => request.Status).IsRequired();
-
-                entity.Property(request => request.Priority).IsRequired();
-
-                entity.Property(request => request.CreatedAt).IsRequired();
-
-                entity.Property(request => request.UpdatedAt).IsRequired();
-
-                entity.HasOne<Organization>().WithMany().HasForeignKey(operation => operation.OrganizationId)
-                                                        .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne<User>().WithMany().HasForeignKey(request => new { request.OrganizationId, request.RequesterUserId })
-                                                .HasPrincipalKey(user => new {user.OrganizationId, user.Id })
-                                                .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne<Team>().WithMany().HasForeignKey(request => new { request.OrganizationId, request.TeamId })
-                                                .HasPrincipalKey(team => new { team.OrganizationId, team.Id })
-                                                .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne<User>().WithMany().HasForeignKey(request => new { request.OrganizationId, request.AssigneeUserId })
-                                                .HasPrincipalKey(user => new { user.OrganizationId, user.Id })
-                                                .OnDelete(DeleteBehavior.Restrict);
-
-                // Configure indexes
-                entity.HasIndex(request => new { request.OrganizationId, request.Status });
-
-                entity.HasIndex(request => new { request.OrganizationId, request.AssigneeUserId });
-
-                entity.HasIndex(request => new { request.OrganizationId, request.TeamId });
-            });
-
-            modelBuilder.Entity<AuditEntry>(entity =>
-            {
-                entity.HasKey(audit => audit.Id);
-
-                entity.Property(audit => audit.Action).HasConversion<string>().HasMaxLength(100).IsRequired();
-
-                entity.Property(audit => audit.TargetType).HasConversion<string>().HasMaxLength(100).IsRequired();
-
-                entity.Property(audit => audit.OccurredAtUtc).IsRequired();
-
-                entity.Property(audit => audit.DetailsJson).HasMaxLength(4000);
-
-                entity.HasOne<Organization>().WithMany().HasForeignKey(audit => audit.OrganizationId)
-                                                        .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne<User>().WithMany().HasForeignKey(audit => new { audit.OrganizationId, audit.ActorUserId })
-                                                .HasPrincipalKey(user => new { user.OrganizationId, user.Id })
-                                                .OnDelete(DeleteBehavior.Restrict);
-
-                // supports querying an organization's audit history chronologically.
-                entity.HasIndex(audit => new { audit.OrganizationId, audit.OccurredAtUtc });
-
-                entity.HasIndex(audit => new { audit.OrganizationId, audit.TargetType, audit.TargetId });
-            });
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(OperationsDbContext).Assembly);
         }
     }
 }

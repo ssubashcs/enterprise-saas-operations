@@ -1,9 +1,10 @@
-﻿using EnterpriseSaaSOperations.Application;
+﻿using Microsoft.EntityFrameworkCore;
+
+using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
-namespace EnterpriseSaaSOperations.Infrastructure.Persistence
+namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
 {
     internal sealed class OperationalRequestRepository(OperationsDbContext dbContext) : IOperationalRequestRepository
     {

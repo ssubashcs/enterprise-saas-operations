@@ -1,7 +1,7 @@
 ﻿using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Auditing;
 
-namespace EnterpriseSaaSOperations.Infrastructure.Persistence
+namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
 {
     internal sealed class AuditLogRepository(OperationsDbContext dbContext) : IAuditLogRepository
     {

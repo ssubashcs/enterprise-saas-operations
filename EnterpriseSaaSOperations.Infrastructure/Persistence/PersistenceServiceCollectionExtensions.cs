@@ -1,8 +1,9 @@
-﻿using EnterpriseSaaSOperations.Application;
-using EnterpriseSaaSOperations.Application.Abstractions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 {

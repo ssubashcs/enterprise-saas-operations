@@ -1,8 +1,9 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
-using EnterpriseSaaSOperations.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace EnterpriseSaaSOperations.Infrastructure.Persistence
+using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Domain.Entities;
+
+namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
 {
     internal sealed class DomainUserRepository(OperationsDbContext dbContext) : IDomainUserRepository
     {

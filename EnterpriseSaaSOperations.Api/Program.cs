@@ -1,19 +1,20 @@
+using System.Text.Json.Serialization;
 
-using EnterpriseSaaSOperations.Api.Authorization;
-using EnterpriseSaaSOperations.Application.Authentication;
-using EnterpriseSaaSOperations.Application.Members;
-using EnterpriseSaaSOperations.Application.OperationalRequests;
-using EnterpriseSaaSOperations.Application.Organizations;
-using EnterpriseSaaSOperations.Application.Teams;
-using EnterpriseSaaSOperations.Application.Users;
-using EnterpriseSaaSOperations.Domain.Enums;
-using EnterpriseSaaSOperations.Infrastructure.Identity;
-using EnterpriseSaaSOperations.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
+using EnterpriseSaaSOperations.Domain.Enums;
+using EnterpriseSaaSOperations.Api.Authorization;
+using EnterpriseSaaSOperations.Application.Teams;
+using EnterpriseSaaSOperations.Application.Users;
+using EnterpriseSaaSOperations.Application.Members;
+using EnterpriseSaaSOperations.Application.Organizations;
+using EnterpriseSaaSOperations.Application.Authentication;
+using EnterpriseSaaSOperations.Application.OperationalRequests;
+using EnterpriseSaaSOperations.Infrastructure.Identity;
+using EnterpriseSaaSOperations.Infrastructure.Persistence;
 
 namespace EnterpriseSaaSOperations.Api
 {

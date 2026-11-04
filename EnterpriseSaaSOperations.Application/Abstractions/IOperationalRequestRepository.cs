@@ -1,7 +1,7 @@
-﻿using EnterpriseSaaSOperations.Application.OperationalRequests;
-using EnterpriseSaaSOperations.Domain.Entities;
+﻿using EnterpriseSaaSOperations.Domain.Entities;
+using EnterpriseSaaSOperations.Application.OperationalRequests;
 
-namespace EnterpriseSaaSOperations.Application
+namespace EnterpriseSaaSOperations.Application.Abstractions
 {
     public interface IOperationalRequestRepository
     {

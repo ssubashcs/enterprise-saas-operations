@@ -38,7 +38,7 @@ Content-Type: application/json
 }
 
 ###
-GET {{HostAddress}}/api/requests/3
+GET {{HostAddress}}/api/requests/1
 Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 
 ###
