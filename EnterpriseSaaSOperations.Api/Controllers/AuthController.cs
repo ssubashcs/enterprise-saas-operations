@@ -3,6 +3,7 @@ using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {
@@ -51,8 +52,8 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<CurrentUserResponse>> GetCurrentUser(CancellationToken cancellationToken)
         {
-            // MapInboundClaims is disabled, so the JWT subject remains "sub".
-            var identityUserId = User.FindFirst("sub")?.Value;
+            // Inbound claim mapping is disabled, so the JWT subject claim retains its original name.
+            string? identityUserId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {

@@ -1,5 +1,6 @@
 ﻿using EnterpriseSaaSOperations.Application.Abstractions;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EnterpriseSaaSOperations.Api.Authorization
 {
@@ -17,8 +18,8 @@ namespace EnterpriseSaaSOperations.Api.Authorization
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DomainRoleRequirement requirement)
         {
-            // The authenticated JWT identifies the Identity account through "sub".
-            var identityUserId = context.User.FindFirst("sub")?.Value;
+            // The JWT subject claim identifies the authenticated Identity account.
+            string? identityUserId = context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
             if (string.IsNullOrWhiteSpace(identityUserId)) return;
 

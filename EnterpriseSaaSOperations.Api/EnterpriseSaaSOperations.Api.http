@@ -165,8 +165,8 @@ Content-Type: application/json
 }
 
 ### Promote
-PUT {{HostAddress}}/api/members/1004/role
-Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+PUT {{HostAddress}}/api/users/1004/role
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 
 {
@@ -174,7 +174,7 @@ Content-Type: application/json
 }
 
 ### Demote
-PUT {{HostAddress}}/api/members/1004/role
+PUT {{HostAddress}}/api/users/1004/role
 Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
 Content-Type: application/json
 

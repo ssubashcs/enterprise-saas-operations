@@ -38,7 +38,7 @@ namespace EnterpriseSaaSOperations.Api
                                 var jwtOptions = jwtOptionsAccessor.Value;
                                 var signingKeyBytes = Convert.FromBase64String(jwtOptions.SigningKey);
 
-                                // Keep JWT claim names such as "sub" unchanged.
+                                // Preserve the original JWT claim names during authentication.
                                 options.MapInboundClaims = false;
 
                                 options.TokenValidationParameters = new()

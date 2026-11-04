@@ -8,6 +8,7 @@ using EnterpriseSaaSOperations.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {
@@ -105,7 +106,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
         private async Task<CurrentUserAccessContext?> ResolveCurrentUserAsync(CancellationToken cancellationToken)
         {
-            var identityUserId = User.FindFirst("sub")?.Value;
+            string? identityUserId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
             if (string.IsNullOrWhiteSpace(identityUserId)) return null;
 
