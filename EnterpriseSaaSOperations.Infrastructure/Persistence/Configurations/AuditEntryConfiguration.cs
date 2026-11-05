@@ -6,7 +6,7 @@ using EnterpriseSaaSOperations.Domain.Entities;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Configurations
 {
-    internal sealed class AuditEntryConfiguration : IEntityTypeConfiguration<AuditEntry>
+    internal class AuditEntryConfiguration : IEntityTypeConfiguration<AuditEntry>
     {
         public void Configure(EntityTypeBuilder<AuditEntry> entity)
         {

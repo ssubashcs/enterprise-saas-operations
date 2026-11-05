@@ -6,7 +6,7 @@ using EnterpriseSaaSOperations.Infrastructure.Identity;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Configurations
 {
-    internal sealed class IdentityUserConfiguration : IEntityTypeConfiguration<ApplicationIdentityUser>
+    internal class IdentityUserConfiguration : IEntityTypeConfiguration<ApplicationIdentityUser>
     {
         public void Configure(EntityTypeBuilder<ApplicationIdentityUser> entity)
         {

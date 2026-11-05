@@ -25,7 +25,6 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
                                                          cancellationToken);
         }
 
-        /// <inheritdoc />
         public Task<Team?> GetByIdForUpdateAsync(int teamId, int organizationId, CancellationToken cancellationToken = default)
         {
             return _dbContext.Teams.SingleOrDefaultAsync(team => team.Id == teamId &&
@@ -33,7 +32,6 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
                                                          cancellationToken);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyList<Team>> GetPageAsync(int organizationId, int skip, int take, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Teams.AsNoTracking()

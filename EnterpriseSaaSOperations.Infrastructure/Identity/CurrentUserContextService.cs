@@ -5,11 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class CurrentUserContextService(OperationsDbContext dbContext) : ICurrentUserContextService
+    internal sealed class CurrentUserContextService(OperationsDbContext dbContext) : ICurrentUserContextService
     {
         private readonly OperationsDbContext _dbContext = dbContext; 
 
-        /// <inheritdoc/>
         public async Task<CurrentUserAccessContext?> GetByIdentityUserIdAsync(string identityUserId, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(identityUserId);

@@ -16,7 +16,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
     [Route("api/requests")]
     [ApiController]
     [Authorize]
-    public sealed class OperationalRequestsController : ControllerBase
+    public class OperationalRequestsController : ControllerBase
     {
         private readonly ICurrentUserContextService _currentUserContextService;
         private readonly OperationalRequestService _requestService;

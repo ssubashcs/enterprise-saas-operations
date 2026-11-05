@@ -6,7 +6,7 @@ namespace EnterpriseSaaSOperations.Api.Authorization
     /// <summary>
     /// Describes the condition; which domain roles satisfy an authorization requirement.
     /// </summary>
-    internal sealed class DomainRoleRequirement : IAuthorizationRequirement 
+    internal class DomainRoleRequirement : IAuthorizationRequirement 
     {
         internal DomainRoleRequirement(params UserRole[] allowedRoles)
         {

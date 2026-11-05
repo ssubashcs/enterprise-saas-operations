@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EnterpriseSaaSOperations.Application.Users
 {
-    public class UserRoleManagementService(IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork,
+    public sealed class UserRoleManagementService(IDomainUserRepository domainUserRepository, IUnitOfWork unitOfWork,
                                            IAuditLogRepository auditLogRepository)
     {
         private readonly IDomainUserRepository _domainUserRepository = domainUserRepository;

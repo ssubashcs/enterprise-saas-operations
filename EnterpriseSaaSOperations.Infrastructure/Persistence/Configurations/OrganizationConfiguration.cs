@@ -5,7 +5,7 @@ using EnterpriseSaaSOperations.Domain.Entities;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Configurations
 {
-    internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
+    internal class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
     {
         public void Configure(EntityTypeBuilder<Organization> entity)
         {

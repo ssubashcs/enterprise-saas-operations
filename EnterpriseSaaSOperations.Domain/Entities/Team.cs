@@ -1,6 +1,6 @@
 ﻿namespace EnterpriseSaaSOperations.Domain.Entities
 {
-    public class Team
+    public sealed class Team
     {
         public Team(int organizationId, string name)
         {

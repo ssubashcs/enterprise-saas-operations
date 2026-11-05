@@ -5,7 +5,7 @@ using EnterpriseSaaSOperations.Domain.Entities;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Configurations
 {
-    internal sealed class OperationalRequestConfiguration : IEntityTypeConfiguration<OperationalRequest>
+    internal class OperationalRequestConfiguration : IEntityTypeConfiguration<OperationalRequest>
     {
         public void Configure(EntityTypeBuilder<OperationalRequest> entity)
         {

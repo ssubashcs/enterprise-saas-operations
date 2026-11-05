@@ -4,14 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    internal sealed class IdentityAccountManager : IIdentityAccountManager
+    internal sealed class IdentityAccountManager(UserManager<ApplicationIdentityUser> userManager) : IIdentityAccountManager
     {
-        private readonly UserManager<ApplicationIdentityUser> _userManager;
-
-        public IdentityAccountManager(UserManager<ApplicationIdentityUser> userManager)
-        {
-            _userManager = userManager;
-        }
+        private readonly UserManager<ApplicationIdentityUser> _userManager = userManager;
 
         public async Task<IdentityAccountCreationResult> CreateAsync(int domainUserId, string email, string password)
         {

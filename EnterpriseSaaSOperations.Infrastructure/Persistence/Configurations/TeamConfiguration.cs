@@ -5,7 +5,7 @@ using EnterpriseSaaSOperations.Domain.Entities;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Configurations
 {
-    internal sealed class TeamConfiguration : IEntityTypeConfiguration<Team>
+    internal class TeamConfiguration : IEntityTypeConfiguration<Team>
     {
         public void Configure(EntityTypeBuilder<Team> entity)
         {

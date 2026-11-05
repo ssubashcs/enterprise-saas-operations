@@ -7,7 +7,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public sealed class OrganizationsController(OrganizationOnboardingService onboardingService) : ControllerBase
+    public class OrganizationsController(OrganizationOnboardingService onboardingService) : ControllerBase
     {
         private readonly OrganizationOnboardingService _onboardingService = onboardingService;
 

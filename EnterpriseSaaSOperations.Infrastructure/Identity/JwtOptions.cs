@@ -1,6 +1,6 @@
 ﻿namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class JwtOptions
+    public class JwtOptions
     {
         public const string SectionName = "Jwt";
 

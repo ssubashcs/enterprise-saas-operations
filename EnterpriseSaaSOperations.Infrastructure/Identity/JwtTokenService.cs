@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class JwtTokenService : IAccessTokenIssuer
+    internal sealed class JwtTokenService : IAccessTokenIssuer
     {
         private readonly JwtOptions _options;
         private readonly SymmetricSecurityKey _signingKey;

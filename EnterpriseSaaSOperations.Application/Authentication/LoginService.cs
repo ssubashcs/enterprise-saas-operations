@@ -2,7 +2,7 @@
 
 namespace EnterpriseSaaSOperations.Application.Authentication
 {
-    public class LoginService(ICredentialVerifier credentialVerifier, IAccessTokenIssuer accessTokenIssuer)
+    public sealed class LoginService(ICredentialVerifier credentialVerifier, IAccessTokenIssuer accessTokenIssuer)
     {
         private readonly ICredentialVerifier _credentialVerifier = credentialVerifier;
         private readonly IAccessTokenIssuer _accessTokenIssuer = accessTokenIssuer;

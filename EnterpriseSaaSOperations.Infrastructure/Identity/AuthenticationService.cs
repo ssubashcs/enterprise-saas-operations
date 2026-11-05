@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
-    public sealed class AuthenticationService : ICredentialVerifier
+    internal sealed class AuthenticationService : ICredentialVerifier
     {
         private readonly UserManager<ApplicationIdentityUser> _userManager;
         private readonly SignInManager<ApplicationIdentityUser> _signInManager;

@@ -11,15 +11,15 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence
     {
         public OperationsDbContext(DbContextOptions<OperationsDbContext> options) : base(options) { }
 
-        public DbSet<Organization> Organizations => Set<Organization>();
+        internal DbSet<Organization> Organizations => Set<Organization>();
 
-        public DbSet<User> DomainUsers => Set<User>();
+        internal DbSet<User> DomainUsers => Set<User>();
 
-        public DbSet<Team> Teams => Set<Team>();
+        internal DbSet<Team> Teams => Set<Team>();
 
-        public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+        internal DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
-        public DbSet<OperationalRequest> OperationalRequests => Set<OperationalRequest>();
+        internal DbSet<OperationalRequest> OperationalRequests => Set<OperationalRequest>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
