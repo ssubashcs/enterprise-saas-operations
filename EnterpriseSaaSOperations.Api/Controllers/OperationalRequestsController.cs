@@ -31,7 +31,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(typeof(OperationalRequestResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<OperationalRequestResponse>> Create(CreateOperationalRequestDto request, CancellationToken cancellationToken)
+        public async Task<ActionResult<OperationalRequestResponse>> Create(OperationalRequestCreationRequest request, CancellationToken cancellationToken)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
@@ -70,7 +70,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Assign(int id, AssignOperationalRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Assign(int id, OperationalRequestAssignmentRequest request, CancellationToken cancellationToken)
         {
             CurrentUserAccessContext? currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
@@ -117,7 +117,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> ChangeStatus(int id, ChangeOperationalRequestStatusDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ChangeStatus(int id, OperationalRequestStatusChangeRequest request, CancellationToken cancellationToken)
         {
             CurrentUserAccessContext? currentUser = await ResolveCurrentUserAsync(cancellationToken);
 
