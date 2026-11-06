@@ -1,12 +1,13 @@
-﻿using EnterpriseSaaSOperations.Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+
+using EnterpriseSaaSOperations.Domain.Enums;
 
 namespace EnterpriseSaaSOperations.Api.Authorization
 {
     /// <summary>
     /// Describes the condition; which domain roles satisfy an authorization requirement.
     /// </summary>
-    internal class DomainRoleRequirement : IAuthorizationRequirement 
+    internal class DomainRoleRequirement : IAuthorizationRequirement
     {
         internal DomainRoleRequirement(params UserRole[] allowedRoles)
         {

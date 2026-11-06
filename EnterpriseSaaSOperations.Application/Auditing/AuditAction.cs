@@ -6,7 +6,7 @@
     public enum AuditAction
     {
         UserRoleChanged,
-        OperationalRequestAssigned, 
+        OperationalRequestAssigned,
         OperationalRequestStatusChanged
     }
 }

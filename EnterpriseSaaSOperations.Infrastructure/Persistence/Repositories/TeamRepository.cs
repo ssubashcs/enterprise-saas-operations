@@ -10,7 +10,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
     /// </summary>
     internal sealed class TeamRepository(OperationsDbContext dbContext) : ITeamRepository
     {
-        private readonly OperationsDbContext _dbContext = dbContext;    
+        private readonly OperationsDbContext _dbContext = dbContext;
 
         public void Add(Team team)
         {
@@ -20,7 +20,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
         public Task<Team?> GetByIdAsync(int teamId, int organizationId, CancellationToken cancellationToken = default)
         {
             return _dbContext.Teams.AsNoTracking()
-                                   .SingleOrDefaultAsync(team => team.Id == teamId && 
+                                   .SingleOrDefaultAsync(team => team.Id == teamId &&
                                                                  team.OrganizationId == organizationId,
                                                          cancellationToken);
         }

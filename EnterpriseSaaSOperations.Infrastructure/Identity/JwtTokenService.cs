@@ -1,10 +1,12 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
-using EnterpriseSaaSOperations.Application.Authentication;
+﻿using System.Globalization;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+
+using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Application.Authentication;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {
@@ -38,7 +40,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Identity
                                                                .ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
             };
 
-            JwtSecurityToken token = new(_options.Issuer, _options.Audience, claims, issuedAt.UtcDateTime, 
+            JwtSecurityToken token = new(_options.Issuer, _options.Audience, claims, issuedAt.UtcDateTime,
                                             expiresAt.UtcDateTime, new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256));
 
             // Serializes a JwtSecurityToken into a JWT in a compact serialization format.                                             

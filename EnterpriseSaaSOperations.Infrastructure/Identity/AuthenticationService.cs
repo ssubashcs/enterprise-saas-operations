@@ -1,6 +1,7 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
+﻿using Microsoft.AspNetCore.Identity;
+
+using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Authentication;
-using Microsoft.AspNetCore.Identity;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {

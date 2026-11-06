@@ -22,7 +22,7 @@ public sealed class TeamMembershipService(IDomainUserRepository domainUserReposi
             return new TeamMembershipResult(false, null, null, TeamMembershipFailure.CallerNotAdministratorOrOwner);
         }
 
-        var user = await _domainUserRepository.GetByIdForUpdateAsync(userId, currentUser.OrganizationId, cancellationToken); 
+        var user = await _domainUserRepository.GetByIdForUpdateAsync(userId, currentUser.OrganizationId, cancellationToken);
 
         if (user is null)
         {

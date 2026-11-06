@@ -1,7 +1,8 @@
-﻿using EnterpriseSaaSOperations.Api.Contracts.Organizations;
-using EnterpriseSaaSOperations.Application.Organizations;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+
+using EnterpriseSaaSOperations.Application.Organizations;
+using EnterpriseSaaSOperations.Api.Contracts.Organizations;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {
@@ -28,7 +29,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
             if (!result.Succeeded)
             {
-                Dictionary<string, string[]> errors = new() 
+                Dictionary<string, string[]> errors = new()
                 {
                     ["account"] = result.Errors.ToArray()
                 };

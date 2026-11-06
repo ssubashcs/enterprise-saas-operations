@@ -44,6 +44,6 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Configurations
             entity.HasIndex(request => new { request.OrganizationId, request.AssigneeUserId });
 
             entity.HasIndex(request => new { request.OrganizationId, request.TeamId });
-        }   
+        }
     }
 }

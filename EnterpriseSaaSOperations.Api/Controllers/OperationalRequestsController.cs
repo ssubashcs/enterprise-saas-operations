@@ -1,15 +1,17 @@
-﻿using EnterpriseSaaSOperations.Api.Authorization;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Api.Contracts.Common;
 using EnterpriseSaaSOperations.Api.Contracts.OperationalRequests;
-using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Identity;
+using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
-using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
+using EnterpriseSaaSOperations.Domain.Entities;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {
@@ -80,7 +82,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
             if (result.Success)
             {
-                OperationalRequestAssignmentResponse response = new(result.RequestId!.Value, result.TeamId!.Value, 
+                OperationalRequestAssignmentResponse response = new(result.RequestId!.Value, result.TeamId!.Value,
                                                                     result.AssigneeUserId!.Value, result.Status!.Value);
 
                 return Ok(response);
@@ -123,12 +125,12 @@ namespace EnterpriseSaaSOperations.Api.Controllers
 
             if (currentUser is null) return Unauthorized();
 
-            RequestStatusChangeResult result = await _requestService.ChangeStatusAsync(currentUser, id, 
+            RequestStatusChangeResult result = await _requestService.ChangeStatusAsync(currentUser, id,
                                                                                        request.NewStatus!.Value, cancellationToken);
 
             if (result.Success)
             {
-                RequestStatusChangeResponse response = new(result.RequestId!.Value, result.PreviousStatus!.Value, 
+                RequestStatusChangeResponse response = new(result.RequestId!.Value, result.PreviousStatus!.Value,
                                                            result.Status!.Value, result.UpdatedAt!.Value);
 
                 return Ok(response);
@@ -166,7 +168,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
                                                 [Range(1, 1_000_000)] int page = 1, [Range(1, 100)] int pageSize = 20,
                                                 [EnumDataType(typeof(RequestStatus))] RequestStatus? status = null,
                                                 [EnumDataType(typeof(RequestPriority))] RequestPriority? priority = null,
-                                                [Range(1, int.MaxValue)] int? teamId = null, 
+                                                [Range(1, int.MaxValue)] int? teamId = null,
                                                 [Range(1, int.MaxValue)] int? assigneeUserId = null, CancellationToken cancellationToken = default)
         {
             var currentUser = await ResolveCurrentUserAsync(cancellationToken);
@@ -178,7 +180,7 @@ namespace EnterpriseSaaSOperations.Api.Controllers
             var result = await _requestService.GetPageAsync(currentUser, page, pageSize, filter, cancellationToken);
 
             var response = new PagedResponse<OperationalRequestResponse>(result.Items.Select(ToResponse).ToArray(),
-                                                                         result.Page, result.PageSize, result.TotalCount); 
+                                                                         result.Page, result.PageSize, result.TotalCount);
 
             return Ok(response);
         }

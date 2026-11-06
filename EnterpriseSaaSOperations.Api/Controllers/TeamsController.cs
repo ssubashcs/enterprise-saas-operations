@@ -1,14 +1,16 @@
-﻿using EnterpriseSaaSOperations.Api.Authorization;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+using EnterpriseSaaSOperations.Api.Authorization;
 using EnterpriseSaaSOperations.Api.Contracts.Common;
 using EnterpriseSaaSOperations.Api.Contracts.Teams;
 using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Application.Teams;
 using EnterpriseSaaSOperations.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {

@@ -1,6 +1,6 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
+﻿using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
-using System.IdentityModel.Tokens.Jwt;
+using EnterpriseSaaSOperations.Application.Abstractions;
 
 namespace EnterpriseSaaSOperations.Api.Authorization
 {

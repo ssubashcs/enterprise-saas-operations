@@ -1,5 +1,5 @@
-﻿using EnterpriseSaaSOperations.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using EnterpriseSaaSOperations.Domain.Enums;
 
 namespace EnterpriseSaaSOperations.Api.Contracts.Users
 {

@@ -1,8 +1,9 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
-using EnterpriseSaaSOperations.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using EnterpriseSaaSOperations.Application.Abstractions;
+using EnterpriseSaaSOperations.Infrastructure.Persistence;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Identity
 {

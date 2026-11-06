@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
+using EnterpriseSaaSOperations.Domain.Entities;
 using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.OperationalRequests;
-using EnterpriseSaaSOperations.Domain.Entities;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
 {
@@ -34,7 +34,7 @@ namespace EnterpriseSaaSOperations.Infrastructure.Persistence.Repositories
                                                                        cancellationToken);
         }
 
-        public async Task<IReadOnlyList<OperationalRequest>> GetPageAsync(int organizationId, int skip, int take, 
+        public async Task<IReadOnlyList<OperationalRequest>> GetPageAsync(int organizationId, int skip, int take,
                                                                           OperationalRequestFilter filter, CancellationToken cancellationToken = default)
         {
             IQueryable<OperationalRequest> query = BuildFilteredQuery(organizationId, filter);

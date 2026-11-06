@@ -1,5 +1,5 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using EnterpriseSaaSOperations.Application.Abstractions;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence
 {

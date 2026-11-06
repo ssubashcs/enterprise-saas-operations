@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-using EnterpriseSaaSOperations.Application.Auditing;
 using EnterpriseSaaSOperations.Domain.Entities;
+using EnterpriseSaaSOperations.Application.Auditing;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 
 namespace EnterpriseSaaSOperations.Infrastructure.Persistence

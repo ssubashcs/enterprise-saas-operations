@@ -1,8 +1,9 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
+﻿using System.Text.Json;
+
+using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Auditing;
 using EnterpriseSaaSOperations.Application.Identity;
 using EnterpriseSaaSOperations.Domain.Enums;
-using System.Text.Json;
 
 namespace EnterpriseSaaSOperations.Application.Users
 {
@@ -31,7 +32,7 @@ namespace EnterpriseSaaSOperations.Application.Users
 
             if (newRole == UserRole.Owner)
             {
-                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.OwnerRoleCannotBeAssigned); 
+                return new UserRoleChangeResult(false, null, null, UserRoleChangeFailure.OwnerRoleCannotBeAssigned);
             }
 
             var targetUser = await _domainUserRepository.GetByIdForUpdateAsync(targetUserId, currentUser.OrganizationId, cancellationToken);
@@ -68,5 +69,5 @@ namespace EnterpriseSaaSOperations.Application.Users
 
             return new UserRoleChangeResult(true, targetUser.Id, targetUser.Role, null);
         }
-    }   
+    }
 }

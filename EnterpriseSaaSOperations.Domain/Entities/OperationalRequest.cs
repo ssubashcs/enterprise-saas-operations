@@ -4,7 +4,7 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 {
     public sealed class OperationalRequest
     {
-        public OperationalRequest(int organizationId, int requesterUserId, string title, 
+        public OperationalRequest(int organizationId, int requesterUserId, string title,
                                   string description, RequestPriority priority)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -56,7 +56,7 @@ namespace EnterpriseSaaSOperations.Domain.Entities
 
             TeamId = teamId;
             AssigneeUserId = assigneeUserId;
-            Status = RequestStatus.Assigned; 
+            Status = RequestStatus.Assigned;
             UpdatedAt = DateTimeOffset.UtcNow;
         }
 

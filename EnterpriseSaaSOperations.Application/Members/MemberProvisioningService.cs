@@ -1,7 +1,7 @@
-﻿using EnterpriseSaaSOperations.Application.Abstractions;
-using EnterpriseSaaSOperations.Application.Identity;
+﻿using EnterpriseSaaSOperations.Domain.Enums;
 using EnterpriseSaaSOperations.Domain.Entities;
-using EnterpriseSaaSOperations.Domain.Enums;
+using EnterpriseSaaSOperations.Application.Identity;
+using EnterpriseSaaSOperations.Application.Abstractions;
 
 namespace EnterpriseSaaSOperations.Application.Members
 {
@@ -68,7 +68,7 @@ namespace EnterpriseSaaSOperations.Application.Members
                     await transaction.RollbackAsync(CancellationToken.None);
                     _unitOfWork.ClearTrackedChanges();
 
-                    return new MemberProvisioningResult(false, null, teamId, MemberProvisioningFailure.IdentityAccountCreationFailed, 
+                    return new MemberProvisioningResult(false, null, teamId, MemberProvisioningFailure.IdentityAccountCreationFailed,
                                                         identityResult.Errors);
                 }
 

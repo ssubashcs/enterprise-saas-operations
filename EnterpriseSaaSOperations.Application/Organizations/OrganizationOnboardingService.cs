@@ -54,7 +54,7 @@ namespace EnterpriseSaaSOperations.Application.Organizations
                     await transaction.RollbackAsync(CancellationToken.None);
 
                     _unitOfWork.ClearTrackedChanges();
-                    
+
                     return new OrganizationOnboardingResult(false, null, null, accountResult.Errors);
                 }
 

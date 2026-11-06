@@ -5,16 +5,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-using EnterpriseSaaSOperations.Domain.Enums;
 using EnterpriseSaaSOperations.Api.Authorization;
+using EnterpriseSaaSOperations.Application.Authentication;
+using EnterpriseSaaSOperations.Application.Members;
+using EnterpriseSaaSOperations.Application.OperationalRequests;
+using EnterpriseSaaSOperations.Application.Organizations;
 using EnterpriseSaaSOperations.Application.Teams;
 using EnterpriseSaaSOperations.Application.Users;
-using EnterpriseSaaSOperations.Application.Members;
-using EnterpriseSaaSOperations.Application.Organizations;
-using EnterpriseSaaSOperations.Application.Authentication;
-using EnterpriseSaaSOperations.Application.OperationalRequests;
 using EnterpriseSaaSOperations.Infrastructure.Identity;
 using EnterpriseSaaSOperations.Infrastructure.Persistence;
+using EnterpriseSaaSOperations.Domain.Enums;
 
 namespace EnterpriseSaaSOperations.Api
 {
@@ -63,14 +63,14 @@ namespace EnterpriseSaaSOperations.Api
             builder.Services.AddScoped<IAuthorizationHandler, DomainRoleAuthorizationHandler>();
 
             builder.Services.AddAuthorizationBuilder()
-                            .AddPolicy(AuthorizationPolicies.AdministratorOrOwner, 
+                            .AddPolicy(AuthorizationPolicies.AdministratorOrOwner,
                                        policy =>
                                        {
                                            policy.RequireAuthenticatedUser();
                                            policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner,
                                                                                             UserRole.Administrator));
                                        })
-                            .AddPolicy(AuthorizationPolicies.OwnerOnly, 
+                            .AddPolicy(AuthorizationPolicies.OwnerOnly,
                                        policy =>
                                        {
                                            policy.RequireAuthenticatedUser();

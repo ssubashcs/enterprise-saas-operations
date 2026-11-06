@@ -1,9 +1,11 @@
-﻿using EnterpriseSaaSOperations.Api.Contracts.Authentication;
+﻿using System.IdentityModel.Tokens.Jwt;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
 using EnterpriseSaaSOperations.Application.Abstractions;
 using EnterpriseSaaSOperations.Application.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
+using EnterpriseSaaSOperations.Api.Contracts.Authentication;
 
 namespace EnterpriseSaaSOperations.Api.Controllers
 {

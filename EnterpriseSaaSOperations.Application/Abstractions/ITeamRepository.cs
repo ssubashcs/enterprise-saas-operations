@@ -2,7 +2,7 @@
 
 namespace EnterpriseSaaSOperations.Application.Abstractions
 {
-    public interface ITeamRepository  
+    public interface ITeamRepository
     {
         void Add(Team team);
 
