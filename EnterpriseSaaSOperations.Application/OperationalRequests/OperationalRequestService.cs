@@ -197,19 +197,22 @@ namespace EnterpriseSaaSOperations.Application.OperationalRequests
 
             if (filter.Status is { } status && !Enum.IsDefined(status))
             {
-                throw new ArgumentOutOfRangeException(nameof(filter.Status));
+                throw new ArgumentOutOfRangeException(nameof(filter), status, "The Status filter contains an undefined value.");
             }
 
             if (filter.Priority is { } priority && !Enum.IsDefined(priority))
             {
-                throw new ArgumentOutOfRangeException(nameof(filter.Priority));
+                throw new ArgumentOutOfRangeException(nameof(filter), priority, "The Priority filter contains an undefined value.");
             }
 
-            if (filter.TeamId is <= 0) throw new ArgumentOutOfRangeException(nameof(filter.TeamId));
+            if (filter.TeamId is <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(filter), filter.TeamId, "The TeamId filter must be greater than zero.");
+            }
 
             if (filter.AssigneeUserId is <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(filter.AssigneeUserId));
+                throw new ArgumentOutOfRangeException(nameof(filter), filter.AssigneeUserId, "The AssigneeUserId filter must be greater than zero.");
             }
 
             int skip = checked((page - 1) * pageSize);

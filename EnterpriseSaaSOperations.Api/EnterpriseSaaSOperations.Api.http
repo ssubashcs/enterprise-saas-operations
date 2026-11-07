@@ -236,6 +236,10 @@ Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
 GET {{HostAddress}}/api/requests?status=Created&priority=High
 Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
 
+###
+GET {{HostAddress}}/api/requests?teamId=-1
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
 ### List by pagination
 GET {{HostAddress}}/api/requests?page=1&pageSize=3
 Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
