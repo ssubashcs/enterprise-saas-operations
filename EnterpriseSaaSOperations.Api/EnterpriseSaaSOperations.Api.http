@@ -1,6 +1,388 @@
-@EnterpriseSaaSOperations.Api_HostAddress = http://localhost:5006
-
-GET {{EnterpriseSaaSOperations.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+@HostAddress = https://localhost:7282
+@HostHttp = http://localhost:5006
 
 ###
+POST {{HostAddress}}/api/organizations
+Content-Type: application/json
+
+{
+  "organizationName": "Nexora Labs - Onboarding Test",
+  "ownerName": "Test Owner",
+  "email": "owner.onboarding.test@example.com",
+  "password": "Nexora-Onboard#2026"
+}
+
+###
+# @name ownerLogin1
+POST {{HostHttp}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner.onboarding.test@example.com",
+  "password": "Nexora-Onboard#2026"
+}
+
+###
+GET {{HostAddress}}/api/auth/me
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+
+###
+POST {{HostAddress}}/api/requests
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Request sample",
+  "description": "Unable to connect to the test.",
+  "priority": "High"
+}
+
+###
+GET {{HostAddress}}/api/requests/1
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+
+###
+POST {{HostAddress}}/api/organizations
+Content-Type: application/json
+
+{
+  "organizationName": "Architecture Verification Org",
+  "ownerName": "Architecture Test Owner",
+  "email": "architecture-owner-20261016@example.com",
+  "password": "Smoke-Test#2026"
+}
+
+### Login
+# @name ownerLogin2
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "architecture-owner-20261016@example.com",
+  "password": "Smoke-Test#2026"
+}
+
+### Get authenticated user context
+GET {{HostAddress}}/api/auth/me
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
+
+### Create operational request
+# @name architectureRequest
+POST {{HostAddress}}/api/requests
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Code Standards Validation - Sample",
+  "description": "Ensure modules follow coding guidelines.",
+  "priority": "Low"
+}
+
+### Retrieve operational request
+GET {{HostAddress}}/api/requests/{{architectureRequest.response.body.$.id}}
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
+
+###
+# @name createTeam
+POST {{HostAddress}}/api/teams
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "Engineering"
+}
+
+###
+GET {{HostAddress}}/api/teams/1
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+
+###
+GET {{HostAddress}}/api/teams?page=1&pageSize=20
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+
+### 
+PUT {{HostAddress}}/api/teams/1
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "Platform Engineering"
+}
+
+###
+# @name memberTestTeam
+POST {{HostAddress}}/api/teams
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "Member Provisioning Test Team"
+}
+
+### createMemberWithoutTeam
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Provisioned Member One",
+  "email": "member-one-20261020@example.com",
+  "password": "Member-Test#1"
+}
+
+###
+# createMemberWithTeam
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{ownerLogin2.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Provisioned Member Two",
+  "email": "member-two-20261020@example.com",
+  "password": "Member-Test#2026",
+  "teamId": {{memberTestTeam.response.body.$.id}}
+}
+
+###
+# @name memberLogin1
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "member-one-20261020@example.com",
+  "password": "Member-Test#1"
+}
+
+###
+POST {{HostAddress}}/api/members
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Member",
+  "email": "unauthorized-member@example.com",
+  "password": "Member-Test#3"
+}
+
+### Promote
+PUT {{HostAddress}}/api/users/1004/role
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "role": "Administrator"
+}
+
+### Demote
+PUT {{HostAddress}}/api/users/1004/role
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "role": "Member"
+}
+
+###
+# @name memberLogin2
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "member-two-20261020@example.com",
+  "password": "Member-Test#2026"
+}
+
+### Add member to a team
+PUT {{HostAddress}}/api/members/1005/team
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "teamId": 2
+}
+
+### Remove member from a team
+DELETE {{HostAddress}}/api/members/1005/team
+Authorization: Bearer {{memberLogin2.response.body.$.accessToken}}
+
+### Assign the request
+PUT {{HostAddress}}/api/requests/1003/assign
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "teamId": 1,
+  "assigneeUserId": 1005
+}
+
+### Retrieve operational request
+GET {{HostAddress}}/api/requests/1002
+Authorization: Bearer {{memberLogin2.response.body.$.accessToken}}
+
+### Change request status
+PUT {{HostHttp}}/api/requests/1002/status
+Authorization: Bearer {{ownerLogin1.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "newStatus": "Resolved"
+}
+
+### List opertional requests
+GET {{HostAddress}}/api/requests
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+### List by status and priority
+GET {{HostAddress}}/api/requests?status=Created&priority=High
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+###
+GET {{HostAddress}}/api/requests?teamId=-1
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+### List by pagination
+GET {{HostAddress}}/api/requests?page=1&pageSize=3
+Authorization: Bearer {{memberLogin1.response.body.$.accessToken}}
+
+### E2E: REVIEW
+POST {{HostAddress}}/api/organizations
+Content-Type: application/json
+
+{
+  "organizationName": "E2E Test Organization",
+  "ownerName": "E2E Test Owner",
+  "email": "endorg@gmail.com",
+  "password": "Test7pass$"
+}
+
+### Log in as the Owner
+# @name e2eOwnerLogin
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "endorg@gmail.com",
+  "password": "Test7pass$"
+}
+
+### Verify the Owner's identity
+GET {{HostAddress}}/api/auth/me
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Create a team
+# @name e2eCreateTeam
+POST {{HostAddress}}/api/teams
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+    "name": "E2E Operations Team"
+}
+
+### Retrive the team
+GET {{HostAddress}}/api/teams/{{e2eCreateTeam.response.body.$.id}}
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Create a user
+# @name e2eCreateMember
+POST {{HostAddress}}/api/users
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Member 2",
+  "email": "testmember2@email.com",
+  "password": "testMember2)"
+}
+
+### Assign user to team
+# @name e2eAssignMemberToTeam
+PUT {{HostAddress}}/api/users/{{e2eCreateMember.response.body.$.userId}}/team
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "teamId": 1002
+}
+
+### Remove user from a team
+DELETE {{HostAddress}}/api/users/{{e2eCreateMember.response.body.$.userId}}/team
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Promote and Demote
+# @name e2ePromoteMember
+PUT {{HostAddress}}/api/users/2010/role
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "Member"
+}
+
+### Create an operational request
+# @name e2eCreateRequest
+POST {{HostAddress}}/api/requests
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "title": "E2E Infrastructure Issue",
+  "description": "Investigate an infrastructure issue reported by the operations team.",
+  "priority": "High"
+}
+
+### Assign operational request
+# @name e2eAssignRequest
+PUT {{HostAddress}}/api/requests/{{e2eCreateRequest.response.body.$.id}}/assign
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "teamId": 1002,
+  "assigneeUserId": {{e2eCreateMember.response.body.$.userId}}
+}
+
+### Log in as the Member
+# @name e2eMemberLogin
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testmember1@email.com",
+  "password": "testMember1)"
+}
+
+### Process request status
+# @name e2eStartRequest
+PUT {{HostAddress}}/api/requests/{{e2eCreateRequest.response.body.$.id}}/status
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "newStatus": "Closed"
+}
+
+### List teams
+GET {{HostAddress}}/api/teams
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### List requests
+GET {{HostAddress}}/api/requests
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Cross-organization team access
+GET {{HostAddress}}/api/teams/1002
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Cross-organization request access
+GET {{HostAddress}}/api/requests/1006
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+
+### Cross-organization member role change
+PUT {{HostAddress}}/api/members/1005/role
+Authorization: Bearer {{e2eOwnerLogin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "Administrator"
+}

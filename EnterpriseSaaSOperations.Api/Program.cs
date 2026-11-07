@@ -1,3 +1,20 @@
+using System.Text.Json.Serialization;
+
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
+using EnterpriseSaaSOperations.Api.Authorization;
+using EnterpriseSaaSOperations.Application.Authentication;
+using EnterpriseSaaSOperations.Application.Members;
+using EnterpriseSaaSOperations.Application.OperationalRequests;
+using EnterpriseSaaSOperations.Application.Organizations;
+using EnterpriseSaaSOperations.Application.Teams;
+using EnterpriseSaaSOperations.Application.Users;
+using EnterpriseSaaSOperations.Infrastructure.Identity;
+using EnterpriseSaaSOperations.Infrastructure.Persistence;
+using EnterpriseSaaSOperations.Domain.Enums;
 
 namespace EnterpriseSaaSOperations.Api
 {
@@ -8,12 +25,86 @@ namespace EnterpriseSaaSOperations.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddPersistence(builder.Configuration);
+            // Identity registration - configures account-management services and connects them to the db context.
+            builder.Services.AddIdentityServices(builder.Configuration);
 
-            builder.Services.AddControllers();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer();
+
+            builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                            .Configure<IOptions<JwtOptions>>((options, jwtOptionsAccessor) =>
+                            {
+                                var jwtOptions = jwtOptionsAccessor.Value;
+                                var signingKeyBytes = Convert.FromBase64String(jwtOptions.SigningKey);
+
+                                // Preserve the original JWT claim names during authentication.
+                                options.MapInboundClaims = false;
+
+                                options.TokenValidationParameters = new()
+                                {
+                                    ValidateIssuer = true,
+                                    ValidIssuer = jwtOptions.Issuer,
+
+                                    ValidateAudience = true,
+                                    ValidAudience = jwtOptions.Audience,
+
+                                    ValidateIssuerSigningKey = true,
+                                    IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes),
+
+                                    ValidateLifetime = true,
+                                    RequireExpirationTime = true,
+                                    ClockSkew = TimeSpan.FromSeconds(30),
+
+                                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256]
+                                };
+                            });
+
+            builder.Services.AddScoped<IAuthorizationHandler, DomainRoleAuthorizationHandler>();
+
+            builder.Services.AddAuthorizationBuilder()
+                            .AddPolicy(AuthorizationPolicies.AdministratorOrOwner,
+                                       policy =>
+                                       {
+                                           policy.RequireAuthenticatedUser();
+                                           policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner,
+                                                                                            UserRole.Administrator));
+                                       })
+                            .AddPolicy(AuthorizationPolicies.OwnerOnly,
+                                       policy =>
+                                       {
+                                           policy.RequireAuthenticatedUser();
+                                           policy.AddRequirements(new DomainRoleRequirement(UserRole.Owner));
+                                       });
+
+            builder.Services.AddControllers()
+                            .AddJsonOptions(options =>
+                            {
+                                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(null, false));
+                            });
+
+            // Register the Application use cases.
+            builder.Services.AddScoped<LoginService>()
+                            .AddScoped<OrganizationOnboardingService>()
+                            .AddScoped<OperationalRequestService>()
+                            .AddScoped<TeamManagementService>()
+                            .AddScoped<MemberProvisioningService>()
+                            .AddScoped<UserRoleManagementService>()
+                            .AddScoped<TeamMembershipService>();
+
+            // registers the Problem Details service.
+            builder.Services.AddProblemDetails();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            // middleware to handle unhandled exceptions and generate an appropriate error response.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -23,8 +114,8 @@ namespace EnterpriseSaaSOperations.Api
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
