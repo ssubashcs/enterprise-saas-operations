@@ -80,7 +80,7 @@ namespace EnterpriseSaaSOperations.Api
             builder.Services.AddControllers()
                             .AddJsonOptions(options =>
                             {
-                                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(null, false));
+                                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
                             });
 
             // Register the Application use cases.
