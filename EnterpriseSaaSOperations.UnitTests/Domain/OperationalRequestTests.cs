@@ -184,10 +184,210 @@ namespace EnterpriseSaaSOperations.UnitTests.Domain
             Assert.Equal(originalUpdatedAt, request.UpdatedAt);
         }
 
+        [Theory]
+        [InlineData(RequestStatus.InProgress)]
+        [InlineData(RequestStatus.Resolved)]
+        [InlineData(RequestStatus.Closed)]
+        public void Assign_ShouldThrow_WhenRequestIsNotCreatedOrAssigned(RequestStatus status)
+        {
+            OperationalRequest request = CreateRequest();
+
+            request.Assign(teamId: 5, assigneeUserId: 20);
+
+            switch (status)
+            {
+                case RequestStatus.InProgress:
+                    request.ChangeStatus(RequestStatus.InProgress);
+                    break;
+
+                case RequestStatus.Resolved:
+                    request.ChangeStatus(RequestStatus.InProgress);
+                    request.ChangeStatus(RequestStatus.Resolved);
+                    break;
+
+                case RequestStatus.Closed:
+                    request.ChangeStatus(RequestStatus.InProgress);
+                    request.ChangeStatus(RequestStatus.Resolved);
+                    request.ChangeStatus(RequestStatus.Closed);
+                    break;
+            }
+
+            int? originalTeamId = request.TeamId;
+            int? originalAssigneeUserId = request.AssigneeUserId;
+            DateTimeOffset originalUpdatedAt = request.UpdatedAt;
+
+            var exception = Assert.Throws<InvalidOperationException>(() => request.Assign(teamId: 6, assigneeUserId: 30));
+
+            Assert.Contains($"Cannot assign a request while its status is {status}.", exception.Message);
+            Assert.Equal(status, request.Status);
+            Assert.Equal(originalTeamId, request.TeamId);
+            Assert.Equal(originalAssigneeUserId, request.AssigneeUserId);
+            Assert.Equal(originalUpdatedAt, request.UpdatedAt);
+        }
+
+        [Fact]
+        public void ChangeStatus_ShouldMoveToInProgress_WhenRequestIsAssigned()
+        {
+            OperationalRequest request = CreateAssignedRequest();
+
+            DateTimeOffset beforeChange = DateTimeOffset.UtcNow;
+
+            request.ChangeStatus(RequestStatus.InProgress);
+
+            DateTimeOffset afterChange = DateTimeOffset.UtcNow;
+
+            Assert.Equal(RequestStatus.InProgress, request.Status);
+            Assert.InRange(request.UpdatedAt, beforeChange, afterChange);
+            Assert.Equal(TimeSpan.Zero, request.UpdatedAt.Offset);
+        }
+
+        [Fact]
+        public void ChangeStatus_ShouldMoveToResolved_WhenRequestIsInProgress()
+        {
+            OperationalRequest request = CreateAssignedRequest();
+            request.ChangeStatus(RequestStatus.InProgress);
+
+            DateTimeOffset beforeChange = DateTimeOffset.UtcNow;
+
+            request.ChangeStatus(RequestStatus.Resolved);
+
+            DateTimeOffset afterChange = DateTimeOffset.UtcNow;
+
+            Assert.Equal(RequestStatus.Resolved, request.Status);
+            Assert.InRange(request.UpdatedAt, beforeChange, afterChange);
+            Assert.Equal(TimeSpan.Zero, request.UpdatedAt.Offset);
+        }
+
+        [Fact]
+        public void ChangeStatus_ShouldMoveToClosed_WhenRequestIsResolved()
+        {
+            OperationalRequest request = CreateAssignedRequest();
+            request.ChangeStatus(RequestStatus.InProgress);
+            request.ChangeStatus(RequestStatus.Resolved);
+
+            DateTimeOffset beforeChange = DateTimeOffset.UtcNow;
+
+            request.ChangeStatus(RequestStatus.Closed);
+
+            DateTimeOffset afterChange = DateTimeOffset.UtcNow;
+
+            Assert.Equal(RequestStatus.Closed, request.Status);
+            Assert.InRange(request.UpdatedAt, beforeChange, afterChange);
+            Assert.Equal(TimeSpan.Zero, request.UpdatedAt.Offset);
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(100)]
+        [InlineData(999)]
+        public void ChangeStatus_ShouldThrow_WhenStatusIsUndefined(int invalidStatus)
+        {
+            OperationalRequest request = CreateRequest();
+
+            DateTimeOffset originalUpdatedAt = request.UpdatedAt;
+
+            ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(
+                () => request.ChangeStatus((RequestStatus)invalidStatus));
+
+            Assert.Equal("newStatus", exception.ParamName);
+            Assert.Equal(RequestStatus.Created, request.Status);
+            Assert.Equal(originalUpdatedAt, request.UpdatedAt);
+        }
+
+        [Theory]
+        [InlineData(RequestStatus.Created, RequestStatus.Created)]
+        [InlineData(RequestStatus.Created, RequestStatus.Assigned)]
+        [InlineData(RequestStatus.Created, RequestStatus.InProgress)]
+        [InlineData(RequestStatus.Created, RequestStatus.Resolved)]
+        [InlineData(RequestStatus.Created, RequestStatus.Closed)]
+
+        [InlineData(RequestStatus.Assigned, RequestStatus.Created)]
+        [InlineData(RequestStatus.Assigned, RequestStatus.Assigned)]
+        [InlineData(RequestStatus.Assigned, RequestStatus.Resolved)]
+        [InlineData(RequestStatus.Assigned, RequestStatus.Closed)]
+
+        [InlineData(RequestStatus.InProgress, RequestStatus.Created)]
+        [InlineData(RequestStatus.InProgress, RequestStatus.Assigned)]
+        [InlineData(RequestStatus.InProgress, RequestStatus.InProgress)]
+        [InlineData(RequestStatus.InProgress, RequestStatus.Closed)]
+
+        [InlineData(RequestStatus.Resolved, RequestStatus.Created)]
+        [InlineData(RequestStatus.Resolved, RequestStatus.Assigned)]
+        [InlineData(RequestStatus.Resolved, RequestStatus.InProgress)]
+        [InlineData(RequestStatus.Resolved, RequestStatus.Resolved)]
+
+        [InlineData(RequestStatus.Closed, RequestStatus.Created)]
+        [InlineData(RequestStatus.Closed, RequestStatus.Assigned)]
+        [InlineData(RequestStatus.Closed, RequestStatus.InProgress)]
+        [InlineData(RequestStatus.Closed, RequestStatus.Resolved)]
+        [InlineData(RequestStatus.Closed, RequestStatus.Closed)]
+        public void ChangeStatus_ShouldThrow_WhenTransitionIsInvalid(RequestStatus currentStatus, RequestStatus newStatus)
+        {
+            OperationalRequest request = CreateRequestInStatus(currentStatus);
+
+            DateTimeOffset originalUpdatedAt = request.UpdatedAt;
+            int? originalTeamId = request.TeamId;
+            int? originalAssigneeUserId = request.AssigneeUserId;
+
+            var exception = Assert.Throws<InvalidOperationException>(() => request.ChangeStatus(newStatus));
+
+            Assert.Contains($"Cannot transition request from {currentStatus} to {newStatus}.", exception.Message);
+
+            Assert.Equal(currentStatus, request.Status);
+            Assert.Equal(originalTeamId, request.TeamId);
+            Assert.Equal(originalAssigneeUserId, request.AssigneeUserId);
+            Assert.Equal(originalUpdatedAt, request.UpdatedAt);
+        }
+
         private static OperationalRequest CreateRequest()
         {
             return new(organizationId: 1, requesterUserId: 10, title: "Fix login issue",
                        description: "Users cannot log in.", priority: RequestPriority.High);
+        }
+
+        private static OperationalRequest CreateAssignedRequest()
+        {
+            OperationalRequest request = CreateRequest();
+            
+            request.Assign(teamId: 5, assigneeUserId: 20);
+
+            return request;
+        }
+
+        private static OperationalRequest CreateRequestInStatus(RequestStatus status)
+        {
+            OperationalRequest request = CreateRequest();
+
+            switch (status)
+            {
+                case RequestStatus.Created:
+                    return request;
+
+                case RequestStatus.Assigned:
+                    request.Assign(teamId: 5, assigneeUserId: 20);
+                    return request;
+
+                case RequestStatus.InProgress:
+                    request.Assign(teamId: 5, assigneeUserId: 20);
+                    request.ChangeStatus(RequestStatus.InProgress);
+                    return request;
+
+                case RequestStatus.Resolved:
+                    request.Assign(teamId: 5, assigneeUserId: 20);
+                    request.ChangeStatus(RequestStatus.InProgress);
+                    request.ChangeStatus(RequestStatus.Resolved);
+                    return request;
+
+                case RequestStatus.Closed:
+                    request.Assign(teamId: 5, assigneeUserId: 20);
+                    request.ChangeStatus(RequestStatus.InProgress);
+                    request.ChangeStatus(RequestStatus.Resolved);
+                    request.ChangeStatus(RequestStatus.Closed);
+                    return request;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status));
+            }
         }
     }
 }
